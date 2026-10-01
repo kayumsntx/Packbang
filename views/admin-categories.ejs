@@ -1,0 +1,186 @@
+<%- include('partials/header') %>
+<style>
+    .cat-container { max-width: 800px; margin: 20px auto; padding: 20px; background: white; border-radius: 10px; }
+    .cat-item { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #eee; }
+    .cat-order-btn { cursor: pointer; background: #f0f0f0; border: 1px solid #ddd; border-radius: 5px; padding: 5px 10px; margin: 0 5px; }
+    .input-group { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; align-items: center; }
+    .input-group input[type="text"], .input-group select { padding: 10px; border: 1px solid #ddd; border-radius: 5px; }
+    .input-group input[type="file"] { padding: 8px; border: 1px solid #ddd; border-radius: 5px; }
+    .input-group button { background: #f39c12; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; }
+    #cancelBtn { background: #e74c3c; display: none; }
+</style>
+
+<div class="cat-container">
+    <h2>Category Management</h2>
+    
+    <div class="input-group">
+        <input type="text" id="newCatName" placeholder="Enter Category Name">
+        <input type="file" id="newCatImage" accept="image/*"> <!-- সরাসরি ছবি আপলোড -->
+        <select id="parentCatSelect">
+            <option value="">-- Select Parent (Optional) --</option>
+        </select>
+        <button onclick="submitCategory()" id="submitBtn">+ Add Category</button>
+        <button onclick="cancelEdit()" id="cancelBtn">Cancel</button>
+    </div>
+
+    <div id="catList">
+        <!-- Categories loaded here -->
+    </div>
+</div>
+
+<script>
+    let categories = [];
+    let editingId = null;
+
+    async function loadCategories() {
+        const res = await fetch('/api/categories');
+        const data = await res.json();
+        categories = data;
+        
+        // Parent Select Options আপডেট
+        const parentSelect = document.getElementById('parentCatSelect');
+        parentSelect.innerHTML = '<option value="">-- Select Parent (Optional) --</option>';
+        data.forEach(cat => {
+            parentSelect.innerHTML += `<option value="${cat._id}">${cat.name}</option>`;
+        });
+
+        renderCategories(data);
+    }
+
+    function renderCategories(categories) {
+        const list = document.getElementById('catList');
+        list.innerHTML = '';
+        
+        categories.forEach(parent => {
+            const div = document.createElement('div');
+            div.className = 'cat-item';
+            div.innerHTML = `
+                <span><strong>${parent.name}</strong></span>
+                <div>
+                    <button class="cat-order-btn" onclick="moveCategory(${categories.indexOf(parent)}, 'up')">↑</button>
+                    <button class="cat-order-btn" onclick="moveCategory(${categories.indexOf(parent)}, 'down')">↓</button>
+                    <button class="cat-order-btn" onclick="editCategory('${parent._id}')">Edit</button>
+                    <button class="cat-order-btn" onclick="deleteCategory('${parent._id}')">Delete</button>
+                </div>
+            `;
+            list.appendChild(div);
+
+            // Children Render
+            if (parent.children && parent.children.length > 0) {
+                parent.children.forEach(child => {
+                    const childDiv = document.createElement('div');
+                    childDiv.className = 'cat-item';
+                    childDiv.style.marginLeft = '30px';
+                    childDiv.innerHTML = `
+                        <span>&nbsp;&nbsp;↳ ${child.name}</span>
+                        <div>
+                            <button class="cat-order-btn" onclick="editCategory('${child._id}')">Edit</button>
+                            <button class="cat-order-btn" onclick="deleteCategory('${child._id}')">Delete</button>
+                        </div>
+                    `;
+                    list.appendChild(childDiv);
+                });
+            }
+        });
+    }
+
+    // Find category by ID in the tree
+    function findCategoryById(id) {
+        for (let parent of categories) {
+            if (parent._id === id) return parent;
+            if (parent.children) {
+                const child = parent.children.find(c => c._id === id);
+                if (child) return child;
+            }
+        }
+        return null;
+    }
+
+    // Add or Update based on editing state
+    async function submitCategory() {
+        const name = document.getElementById('newCatName').value;
+        const fileInput = document.getElementById('newCatImage');
+        const parentId = document.getElementById('parentCatSelect').value;
+        const file = fileInput.files[0];
+
+        if (!name) return alert('Please enter a name');
+
+        const formData = new FormData();
+        formData.append('name', name);
+        formData.append('parentId', parentId);
+        if (file) formData.append('categoryImage', file);
+
+        if (editingId) {
+            await fetch('/api/admin/categories/' + editingId, {
+                method: 'PUT',
+                body: formData // Content-Type সেট করবেন না, ব্রাউজার নিজেই করবে
+            });
+        } else {
+            await fetch('/api/admin/categories', {
+                method: 'POST',
+                body: formData
+            });
+        }
+
+        // Reset Form
+        document.getElementById('newCatName').value = '';
+        document.getElementById('newCatImage').value = '';
+        document.getElementById('parentCatSelect').value = '';
+        editingId = null;
+        document.getElementById('submitBtn').innerText = '+ Add Category';
+        document.getElementById('cancelBtn').style.display = 'none';
+
+        await loadCategories();
+    }
+
+    async function editCategory(id) {
+        const cat = findCategoryById(id);
+        if (!cat) return;
+
+        editingId = id;
+        document.getElementById('newCatName').value = cat.name;
+        
+        // Parent select set করলে 
+        if (cat.parentId) {
+            document.getElementById('parentCatSelect').value = cat.parentId;
+        } else {
+            document.getElementById('parentCatSelect').value = '';
+        }
+
+        document.getElementById('submitBtn').innerText = 'Update Category';
+        document.getElementById('cancelBtn').style.display = 'inline-block';
+    }
+
+    function cancelEdit() {
+        editingId = null;
+        document.getElementById('newCatName').value = '';
+        document.getElementById('newCatImage').value = '';
+        document.getElementById('parentCatSelect').value = '';
+        document.getElementById('submitBtn').innerText = '+ Add Category';
+        document.getElementById('cancelBtn').style.display = 'none';
+    }
+
+    async function deleteCategory(id) {
+        if(confirm('⚠️ সাবধান! ডিলিট করলে এই ক্যাটাগরির সাথে যুক্ত প্রোডাক্টগুলো লিংক হারিয়ে ফেলবে। তবুও ডিলিট করবেন?')) {
+            await fetch('/api/admin/categories/' + id, { method: 'DELETE' });
+            await loadCategories();
+        }
+    }
+
+    async function moveCategory(index, direction) {
+        const newIndex = direction === 'up' ? index - 1 : index + 1;
+        if (newIndex < 0 || newIndex >= categories.length) return;
+        
+        [categories[index], categories[newIndex]] = [categories[newIndex], categories[index]];
+        const orderedIds = categories.map(c => c._id);
+        await fetch('/api/admin/categories/reorder', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ orderedIds })
+        });
+        renderCategories(categories); // Re-render
+    }
+
+    loadCategories();
+</script>
+<%- include('partials/footer') %>

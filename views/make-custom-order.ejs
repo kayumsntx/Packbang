@@ -1,0 +1,328 @@
+<%- include('partials/header') %>
+
+<style>
+    .custom-order-page {
+        max-width: 800px;
+        margin: 40px auto;
+        padding: 20px;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+    }
+    .custom-order-page h2 {
+        border-bottom: 2px solid #f39c12;
+        padding-bottom: 12px;
+        margin-bottom: 24px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    .form-group {
+        margin-bottom: 20px;
+    }
+    .form-group label {
+        font-weight: 600;
+        display: block;
+        margin-bottom: 4px;
+        color: #4a5568;
+    }
+    .form-group input, .form-group textarea, .form-group select {
+        width: 100%;
+        padding: 10px 14px;
+        border: 2px solid #e2e8f0;
+        border-radius: 8px;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+        font-family: inherit;
+    }
+    .form-group input:focus, .form-group textarea:focus {
+        border-color: #f39c12;
+        box-shadow: 0 0 0 3px rgba(243, 156, 18, 0.2);
+        outline: none;
+    }
+    .form-group textarea {
+        resize: vertical;
+        min-height: 120px;
+    }
+    .btn-submit {
+        background: linear-gradient(45deg, #f39c12, #e67e22);
+        color: white;
+        border: none;
+        padding: 12px 32px;
+        border-radius: 8px;
+        font-weight: 700;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        width: 100%;
+    }
+    .btn-submit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 20px rgba(243, 156, 18, 0.4);
+    }
+    .help-text {
+        font-size: 0.8rem;
+        color: #a0aec0;
+        margin-top: 4px;
+    }
+
+    /* ✅ ইমেজ প্রিভিউ স্টাইল */
+    .image-preview-container {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-top: 10px;
+    }
+    .image-preview-container .preview-thumb {
+        width: 80px;
+        height: 80px;
+        object-fit: cover;
+        border-radius: 8px;
+        border: 2px solid #e2e8f0;
+        transition: all 0.3s ease;
+    }
+    .image-preview-container .preview-thumb:hover {
+        border-color: #f39c12;
+        transform: scale(1.05);
+    }
+    .image-preview-container .preview-count {
+        font-size: 0.85rem;
+        color: #2b6cb0;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        background: #ebf8ff;
+        padding: 4px 14px;
+        border-radius: 20px;
+    }
+
+    /* রিমুভ বাটন */
+    .preview-thumb-wrapper {
+        position: relative;
+        display: inline-block;
+    }
+    .preview-thumb-wrapper .preview-remove {
+        position: absolute;
+        top: -6px;
+        right: -6px;
+        width: 20px;
+        height: 20px;
+        line-height: 20px;
+        text-align: center;
+        background: #e53e3e;
+        color: #fff;
+        border-radius: 50%;
+        font-size: 14px;
+        font-weight: 700;
+        cursor: pointer;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+    }
+    .preview-thumb-wrapper .preview-remove:hover {
+        background: #c53030;
+    }
+
+        @media (max-width: 480px) {
+        .preview-thumb-wrapper .preview-remove {
+            width: 26px;
+            height: 26px;
+            line-height: 26px;
+            font-size: 16px;
+            top: -8px;
+            right: -8px;
+        }
+        .image-preview-container .preview-thumb {
+            width: 70px;
+            height: 70px;
+        }
+    }
+</style>
+
+<div class="custom-order-page">
+    <h2><i class="fas fa-pencil-alt"></i> Make a Custom Order</h2>
+    
+    <form id="customOrderForm" enctype="multipart/form-data">
+        <div class="form-group">
+            <label>Order Title *</label>
+            <input type="text" id="orderTitle" placeholder="e.g. Customized Gift Box" required>
+        </div>
+        
+        <div class="form-group">
+            <label>Description *</label>
+            <textarea id="orderDescription" placeholder="Describe your custom order in detail..." required></textarea>
+        </div>
+        
+        <div class="form-group">
+            <label>Budget (BDT)</label>
+            <input type="number" id="orderBudget" placeholder="e.g. 5000" step="0.01">
+        </div>
+        
+        <div class="form-group">
+            <label>Quantity</label>
+            <input type="number" id="orderQuantity" value="1" min="1">
+        </div>
+        
+        <div class="form-group">
+            <label>Deadline</label>
+            <input type="date" id="orderDeadline">
+        </div>
+        
+        <!-- ✅ ছবি আপলোড ফিল্ড - একাধিক ফাইল জমা রাখার ব্যবস্থা -->
+        <div class="form-group">
+            <label><i class="fas fa-images"></i> Reference Images (Max 5)</label>
+            <input type="file" id="orderImages" name="orderImages" accept="image/*" multiple>
+            <div class="help-text">You can upload up to 5 images. You can select multiple files at once, or add them one by one.</div>
+            <div class="image-preview-container" id="imagePreview"></div>
+        </div>
+        
+        <button type="submit" class="btn-submit">
+            <i class="fas fa-paper-plane"></i> Submit Custom Order
+        </button>
+    </form>
+</div>
+
+<script>
+    // ============================================
+    // ✅ একাধিক ফাইল জমা রাখার লজিক (DataTransfer ব্যবহার)
+    // ============================================
+    (function() {
+        const fileInput = document.getElementById('orderImages');
+        const previewContainer = document.getElementById('imagePreview');
+        let selectedFiles = []; // আমাদের নিজস্ব ফাইল অ্যারে
+
+        // ফাইল প্রিভিউ রেন্ডার করা
+        function renderPreview() {
+            previewContainer.innerHTML = '';
+            if (selectedFiles.length === 0) {
+                return;
+            }
+
+            // কাউন্ট ব্যাজ
+            const countSpan = document.createElement('span');
+            countSpan.className = 'preview-count';
+            countSpan.innerHTML = `<i class="fas fa-check-circle"></i> ${selectedFiles.length} image(s) selected`;
+            previewContainer.appendChild(countSpan);
+
+            // প্রতিটি ফাইলের জন্য থাম্বনেইল
+            selectedFiles.forEach((file, index) => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const wrapper = document.createElement('span');
+                    wrapper.className = 'preview-thumb-wrapper';
+
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    img.className = 'preview-thumb';
+                    img.title = file.name;
+                    wrapper.appendChild(img);
+
+                    // রিমুভ বাটন
+                    const removeBtn = document.createElement('span');
+                    removeBtn.className = 'preview-remove';
+                    removeBtn.textContent = '×';
+                    removeBtn.addEventListener('click', function() {
+                        selectedFiles.splice(index, 1);
+                        // আপডেট করা ফাইল লিস্ট ইনপুটে সেট করি
+                        const dt = new DataTransfer();
+                        selectedFiles.forEach(f => dt.items.add(f));
+                        fileInput.files = dt.files;
+                        renderPreview();
+                    });
+                    wrapper.appendChild(removeBtn);
+                    previewContainer.appendChild(wrapper);
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        // ফাইল সিলেক্ট ইভেন্ট
+        fileInput.addEventListener('change', function(e) {
+            const newFiles = Array.from(this.files);
+            if (newFiles.length === 0) return;
+
+            // নতুন ফাইলগুলো যোগ করি (ডুপ্লিকেট চেক না করলেও চলে)
+            // কিন্তু আমরা ডুপ্লিকেট এড়াতে চাইলে নাম+সাইজ চেক করতে পারি
+            newFiles.forEach(file => {
+                const isDuplicate = selectedFiles.some(f =>
+                    f.name === file.name && f.size === file.size && f.lastModified === file.lastModified
+                );
+                if (!isDuplicate && selectedFiles.length < 5) {
+                    selectedFiles.push(file);
+                }
+            });
+
+            // ম্যাক্স ৫-এর বেশি হলে কেটে ফেলি
+            if (selectedFiles.length > 5) {
+                selectedFiles = selectedFiles.slice(0, 5);
+                alert('⚠️ Maximum 5 images allowed. Extra ones ignored.');
+            }
+
+            // ইনপুটের files প্রপার্টি আপডেট করি (যাতে সাবমিটে সব ফাইল যায়)
+            const dt = new DataTransfer();
+            selectedFiles.forEach(f => dt.items.add(f));
+            fileInput.files = dt.files;
+
+            // প্রিভিউ রিফ্রেশ
+            renderPreview();
+        });
+
+        // পেজ লোড হলে প্রিভিউ ক্লিয়ার
+        renderPreview();
+    })();
+
+    // ============================================
+    // ✅ ফর্ম সাবমিট (FormData দিয়ে)
+    // ============================================
+    document.getElementById('customOrderForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const title = document.getElementById('orderTitle').value.trim();
+        const description = document.getElementById('orderDescription').value.trim();
+        const budget = document.getElementById('orderBudget').value;
+        const quantity = document.getElementById('orderQuantity').value;
+        const deadline = document.getElementById('orderDeadline').value;
+        const fileInput = document.getElementById('orderImages');
+        
+        if (!title || !description) {
+            alert('Please fill in title and description.');
+            return;
+        }
+        
+        const formData = new FormData();
+        formData.append('title', title);
+        formData.append('description', description);
+        formData.append('budget', budget || '0');
+        formData.append('quantity', quantity || '1');
+        formData.append('deadline', deadline || '');
+        
+        // এখন fileInput.files-এ সব জমা করা ফাইল আছে
+        const files = fileInput.files;
+        for (let i = 0; i < Math.min(files.length, 5); i++) {
+            formData.append('orderImages', files[i]);
+        }
+        
+        const btn = this.querySelector('.btn-submit');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
+        
+        try {
+            const response = await fetch('/api/custom-order/create', {
+                method: 'POST',
+                body: formData
+            });
+            const data = await response.json();
+            if (data.success) {
+                alert('✅ Custom order submitted! Admin will review it shortly.');
+                window.location.href = '/my-custom-orders';
+            } else {
+                alert('❌ ' + data.message);
+            }
+        } catch (err) {
+            alert('❌ Failed to submit order. Please try again.');
+        }
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-paper-plane"></i> Submit Custom Order';
+    });
+</script>
+
+<%- include('partials/footer') %>

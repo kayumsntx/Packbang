@@ -1,0 +1,352 @@
+<%- include('partials/header') %>
+
+<style>
+    .seller-orders-container { max-width: 1100px; margin: 30px auto; padding: 20px; }
+    .seller-orders-container h2 { border-bottom: 3px solid #f39c12; padding-bottom: 14px; margin-bottom: 26px; display: flex; align-items: center; gap: 12px; color: #1a202c; font-size: 1.5rem; }
+    .seller-orders-container h2 i { color: #f39c12; }
+
+    /* ===== ORDER CARD (TruckLagbe Style) ===== */
+    .order-card { background: white; border-radius: 14px; border: 1px solid #e2e8f0; padding: 22px 26px; margin-bottom: 22px; transition: all 0.3s ease; box-shadow: 0 2px 8px rgba(0,0,0,0.03); position: relative; overflow: hidden; }
+    .order-card:hover { box-shadow: 0 10px 35px rgba(0,0,0,0.08); border-color: #f39c12; transform: translateY(-2px); }
+    .order-card::before { content: ''; position: absolute; top: 0; left: 0; width: 5px; height: 100%; background: #27ae60; }
+
+    .order-card .order-header { display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 10px; margin-bottom: 12px; }
+    .order-card .title { font-size: 1.15rem; font-weight: 700; color: #2d3748; }
+    .order-card .order-id { font-size: 0.75rem; color: #a0aec0; font-weight: 500; margin-left: 10px; background: #f7fafc; padding: 2px 8px; border-radius: 6px; }
+
+    /* ===== TIMER (24 Hours Countdown) ===== */
+    .timer-badge { display: inline-flex; align-items: center; gap: 6px; padding: 5px 14px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; white-space: nowrap; animation: timerPulse 2s infinite; }
+    .timer-badge .timer-value { font-family: 'Courier New', monospace; font-size: 0.85rem; }
+    .timer-badge.bidding-open { background: #c6f6d5; color: #276749; }
+    .timer-badge.bidding-closing { background: #fefcbf; color: #975a16; }
+    .timer-badge.bidding-closed { background: #fed7d7; color: #9b2c2c; animation: none; }
+    @keyframes timerPulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.03); } }
+
+    /* ===== META INFO ===== */
+    .order-card .meta { font-size: 0.85rem; color: #718096; margin: 10px 0 14px 0; display: flex; flex-wrap: wrap; gap: 10px 20px; }
+    .order-card .meta span { display: flex; align-items: center; gap: 6px; background: #f7fafc; padding: 4px 12px; border-radius: 8px; }
+    .order-card .meta i { width: 16px; color: #a0aec0; }
+
+    /* ===== DESCRIPTION ===== */
+    .order-card .description { background: #f7fafc; padding: 14px 18px; border-radius: 10px; border-left: 4px solid #f39c12; font-size: 0.92rem; color: #4a5568; line-height: 1.7; margin: 10px 0 14px 0; }
+
+    /* ===== IMAGES ===== */
+    .order-images { display: flex; gap: 12px; flex-wrap: wrap; margin: 14px 0; }
+    .order-images .img-thumb { width: 80px; height: 80px; object-fit: cover; border-radius: 10px; border: 2px solid #e2e8f0; transition: all 0.3s ease; cursor: pointer; }
+    .order-images .img-thumb:hover { border-color: #f39c12; transform: scale(1.08); box-shadow: 0 4px 15px rgba(243, 156, 18, 0.3); }
+    .order-images .no-image { font-size: 0.85rem; color: #a0aec0; padding: 8px 0; }
+
+    /* ===== BID SECTION (TruckLagbe Style) ===== */
+    .bid-section { background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%); border-radius: 12px; padding: 18px 20px; margin-top: 16px; border: 1px solid #e2e8f0; }
+    .bid-section .bid-label { font-weight: 700; color: #2d3748; display: block; margin-bottom: 12px; font-size: 0.95rem; }
+    .bid-section .bid-label i { color: #f39c12; }
+    .bid-form { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end; }
+    .bid-form .form-group { flex: 1 1 150px; min-width: 120px; }
+    .bid-form .form-group label { display: block; font-size: 0.7rem; font-weight: 700; color: #4a5568; text-transform: uppercase; letter-spacing: 0.3px; margin-bottom: 4px; }
+    .bid-form .form-group input, .bid-form .form-group textarea { width: 100%; padding: 10px 14px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 0.9rem; transition: all 0.2s; background: white; font-family: inherit; }
+    .bid-form .form-group input:focus, .bid-form .form-group textarea:focus { border-color: #f39c12; outline: none; box-shadow: 0 0 0 3px rgba(243, 156, 18, 0.15); }
+    .bid-form .form-group textarea { resize: vertical; min-height: 44px; height: 44px; }
+    .bid-form .btn-bid { padding: 10px 28px; background: linear-gradient(45deg, #f39c12, #e67e22); color: white; border: none; border-radius: 8px; font-weight: 700; font-size: 0.9rem; cursor: pointer; transition: all 0.3s ease; display: inline-flex; align-items: center; gap: 8px; height: 44px; white-space: nowrap; }
+    .bid-form .btn-bid:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(243, 156, 18, 0.4); }
+    .bid-form .btn-bid:disabled { opacity: 0.6; cursor: not-allowed; transform: none !important; box-shadow: none !important; }
+
+    /* ===== ALREADY BID ===== */
+    .already-bid { background: #f0fff4; border: 1px solid #c6f6d5; border-radius: 10px; padding: 14px 18px; color: #276749; font-weight: 600; margin-top: 12px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .already-bid i { color: #27ae60; }
+    .already-bid .bid-status { font-size: 0.7rem; background: #c6f6d5; padding: 3px 14px; border-radius: 20px; color: #276749; margin-left: 8px; font-weight: 700; text-transform: uppercase; }
+
+    /* ===== BID CLOSED MESSAGE ===== */
+    .bid-closed-msg { background: #fff5f5; border: 1px solid #fed7d7; border-radius: 10px; padding: 14px 18px; color: #9b2c2c; font-weight: 600; margin-top: 12px; display: flex; align-items: center; gap: 10px; }
+    .bid-closed-msg i { color: #e53e3e; font-size: 1.1rem; }
+
+    /* ===== EMPTY STATE ===== */
+    .empty-state { text-align: center; padding: 80px 20px; color: #a0aec0; }
+    .empty-state i { font-size: 4rem; display: block; margin-bottom: 16px; color: #e2e8f0; }
+    .empty-state h3 { color: #4a5568; margin-bottom: 8px; }
+    .empty-state p { font-size: 0.95rem; }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 768px) {
+        .seller-orders-container { padding: 12px; }
+        .order-card { padding: 16px 18px; }
+        .order-card .order-header { flex-direction: column; align-items: flex-start; }
+        .bid-form { flex-direction: column; }
+        .bid-form .form-group { flex: 1 1 100%; width: 100%; }
+        .bid-form .btn-bid { width: 100%; justify-content: center; }
+        .order-images .img-thumb { width: 60px; height: 60px; }
+        .timer-badge { width: 100%; justify-content: center; }
+    }
+    @media (max-width: 480px) {
+        .order-card .title { font-size: 1rem; }
+        .order-card .meta { font-size: 0.8rem; gap: 8px; }
+        .order-images .img-thumb { width: 50px; height: 50px; }
+    }
+</style>
+
+<div class="seller-orders-container">
+    <h2><i class="fas fa-gavel"></i> Available Custom Orders for Bidding</h2>
+    
+    <div id="ordersList">
+        <div class="empty-state"><i class="fas fa-spinner fa-spin"></i><p>Loading...</p></div>
+    </div>
+</div>
+
+<script>
+
+    const currentSellerId = '<%= user.id %>';
+
+  async function loadOrders() {
+    try {
+        const res = await fetch('/api/custom-orders', {
+            method: 'GET',
+            headers: { 'Accept': 'application/json' },
+            credentials: 'same-origin' 
+        });
+
+        
+        console.log('📡 API Response Status:', res.status);
+
+      
+        if (res.redirected) {
+            console.error('❌ Redirected to:', res.url);
+            throw new Error('Session expired or not authorized. Please login again.');
+        }
+
+      
+        const rawText = await res.text();
+        console.log('📄 Raw Response:', rawText.substring(0, 200));
+
+        let data;
+        try {
+            data = JSON.parse(rawText);
+        } catch (parseErr) {
+            console.error('❌ JSON Parse Error. Response was:', rawText);
+            throw new Error('Server did not return JSON. Status: ' + res.status);
+        }
+
+        if (data.success) {
+            renderOrders(data.orders);
+        } else {
+            throw new Error(data.message || 'Unknown error');
+        }
+    } catch (err) {
+        console.error('❌ Load Orders Error:', err);
+        document.getElementById('ordersList').innerHTML = `
+            <div class="empty-state">
+                <i class="fas fa-exclamation-circle" style="color:#e53e3e;"></i>
+                <h3>Failed to load orders</h3>
+                <p>${err.message}</p>
+                <p style="font-size:0.75rem; color:#a0aec0; margin-top:10px;">Check browser console (F12) for details.</p>
+            </div>`;
+    }
+}
+        try {
+            const res = await fetch('/api/custom-orders');
+            const data = await res.json();
+            if (data.success) {
+                renderOrders(data.orders);
+            }
+        } catch (err) {
+            console.error(err);
+            document.getElementById('ordersList').innerHTML = `
+                <div class="empty-state">
+                    <i class="fas fa-exclamation-circle" style="color:#e53e3e;"></i>
+                    <h3>Failed to load orders</h3>
+                    <p>Please refresh the page or try again later.</p>
+                </div>`;
+        }
+    
+
+    function renderOrders(orders) {
+        const container = document.getElementById('ordersList');
+        const approved = orders.filter(o => o.status === 'approved');
+        
+        if (approved.length === 0) {
+            container.innerHTML = `
+                <div class="empty-state">
+                    <i class="fas fa-inbox"></i>
+                    <h3>No orders available for bidding</h3>
+                    <p>Check back later – new custom orders will appear here once approved by admin.</p>
+                </div>`;
+            return;
+        }
+        
+        let html = '';
+        approved.forEach(order => {
+            const userBid = order.bids.find(b => b.sellerId === currentSellerId);
+            
+            // Build images HTML
+            let imagesHtml = '';
+            if (order.images && order.images.length > 0) {
+                imagesHtml = '<div class="order-images">';
+                order.images.forEach(img => {
+                    imagesHtml += `<img src="${img}" alt="Reference image" class="img-thumb" onclick="window.open('${img}', '_blank')">`;
+                });
+                imagesHtml += '</div>';
+            } else {
+                imagesHtml = '<div class="no-image"><i class="fas fa-image"></i> No reference images</div>';
+            }
+            
+            // Bid section
+            let bidHtml = '';
+            if (userBid) {
+                bidHtml = `
+                    <div class="already-bid">
+                        <i class="fas fa-check-circle"></i>
+                        You have already placed a bid of <strong>BDT ${parseFloat(userBid.amount).toFixed(2)}</strong>
+                        <span class="bid-status">${userBid.status}</span>
+                    </div>
+                `;
+            } else {
+                bidHtml = `
+                    <div class="bid-section" id="bid-section-${order.id}">
+                        <span class="bid-label"><i class="fas fa-gavel"></i> Place Your Bid</span>
+                        <form class="bid-form" onsubmit="placeBid(event, '${order.id}')">
+                            <div class="form-group">
+                                <label>Amount (BDT) *</label>
+                                <input type="number" name="amount" placeholder="e.g. 5000" required step="0.01" min="1">
+                            </div>
+                            <div class="form-group">
+                                <label>Delivery Time</label>
+                                <input type="text" name="delivery" placeholder="e.g. 3-5 days">
+                            </div>
+                            <div class="form-group">
+                                <label>Note (optional)</label>
+                                <textarea name="note" placeholder="Any special info..."></textarea>
+                            </div>
+                            <button type="submit" class="btn-bid">
+                                <i class="fas fa-paper-plane"></i> Place Bid
+                            </button>
+                        </form>
+                    </div>
+                    <div class="bid-closed-msg" id="closed-msg-${order.id}" style="display:none;">
+                        <i class="fas fa-lock"></i>
+                        <span>Bidding period is over. This order is no longer accepting new bids.</span>
+                    </div>
+                `;
+            }
+            
+            html += `
+                <div class="order-card" data-order-id="${order.id}">
+                    <div class="order-header">
+                        <div>
+                            <span class="title">${order.title}</span>
+                            <span class="order-id">#${order.id}</span>
+                        </div>
+                        <!-- ✅ ২৪ ঘণ্টার কাউন্টডাউন টাইমার -->
+                        <div class="timer-badge" data-created-at="${new Date(order.createdAt).getTime()}" data-order-id="${order.id}">
+                            <i class="fas fa-clock"></i> <span class="timer-value">--:--:--</span>
+                        </div>
+                    </div>
+                    
+                    <div class="meta">
+                        <span><i class="fas fa-user"></i> ${order.customerName}</span>
+                        <span><i class="fas fa-calendar-alt"></i> Posted: ${new Date(order.createdAt).toLocaleDateString('en-BD', { day: '2-digit', month: 'short', year: 'numeric' })}</span>
+                        ${order.budget ? `<span><i class="fas fa-money-bill-wave"></i> Budget: BDT ${parseFloat(order.budget).toFixed(2)}</span>` : ''}
+                        ${order.deadline ? `<span><i class="fas fa-hourglass-end"></i> Deadline: ${new Date(order.deadline).toLocaleDateString('en-BD', { day: '2-digit', month: 'short', year: 'numeric' })}</span>` : ''}
+                    </div>
+                    
+                    <div class="description">${order.description}</div>
+                    
+                    ${imagesHtml}
+                    
+                    ${bidHtml}
+                </div>
+            `;
+        });
+        container.innerHTML = html;
+
+        // রেন্ডার শেষে টাইমার চালু করুন
+        initTimers();
+    }
+
+    // ============================================
+    // ✅ ২৪ ঘণ্টার কাউন্টডাউন টাইমার
+    // ============================================
+    function initTimers() {
+        document.querySelectorAll('.timer-badge').forEach(function (badge) {
+            const createdAt = parseInt(badge.getAttribute('data-created-at'), 10);
+            const orderId = badge.getAttribute('data-order-id');
+            const deadline = createdAt + (24 * 60 * 60 * 1000); // ২৪ ঘণ্টা
+
+            function updateTimer() {
+                const now = Date.now();
+                const remaining = deadline - now;
+
+                if (remaining <= 0) {
+                    badge.className = 'timer-badge bidding-closed';
+                    badge.querySelector('.timer-value').textContent = 'Bidding Closed';
+
+                    // বিড ফর্ম লুকিয়ে ক্লোজড মেসেজ দেখান
+                    const bidSection = document.getElementById('bid-section-' + orderId);
+                    const closedMsg = document.getElementById('closed-msg-' + orderId);
+                    if (bidSection) bidSection.style.display = 'none';
+                    if (closedMsg) closedMsg.style.display = 'flex';
+
+                    clearInterval(timerInterval);
+                    return;
+                }
+
+                const hours = Math.floor(remaining / (1000 * 60 * 60));
+                const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((remaining % (1000 * 60)) / 1000);
+
+                const formatted = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+                badge.querySelector('.timer-value').textContent = formatted;
+
+                if (remaining <= 6 * 60 * 60 * 1000) {
+                    badge.className = 'timer-badge bidding-closing';
+                } else {
+                    badge.className = 'timer-badge bidding-open';
+                }
+            }
+
+            updateTimer();
+            const timerInterval = setInterval(updateTimer, 1000);
+        });
+    }
+
+    // ============================================
+    // বিড সাবমিট
+    // ============================================
+    async function placeBid(e, orderId) {
+        e.preventDefault();
+        const form = e.target;
+        const amount = form.querySelector('input[name="amount"]').value;
+        const delivery = form.querySelector('input[name="delivery"]').value;
+        const note = form.querySelector('textarea[name="note"]').value;
+        
+        if (!amount || parseFloat(amount) <= 0) {
+            alert('Please enter a valid bid amount.');
+            return;
+        }
+        
+        const btn = form.querySelector('.btn-bid');
+        const originalText = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
+        
+        try {
+            const res = await fetch(`/api/custom-order/${orderId}/bid`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ amount, deliveryTime: delivery, note })
+            });
+            const data = await res.json();
+            if (data.success) {
+                alert('✅ Bid placed successfully!');
+                loadOrders();
+            } else {
+                alert('❌ ' + data.message);
+            }
+        } catch (err) {
+            alert('❌ Failed to place bid. Please try again.');
+        }
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+    }
+
+    document.addEventListener('DOMContentLoaded', loadOrders);
+</script>
+
+<%- include('partials/footer') %>

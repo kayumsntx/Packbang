@@ -1,0 +1,287 @@
+<%- include('partials/header') %>
+
+<style>
+    .scan-page {
+        max-width: 600px;
+        margin: 40px auto;
+        padding: 20px;
+    }
+
+    .scan-card {
+        background: white;
+        border-radius: 16px;
+        padding: 32px;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.08);
+        text-align: center;
+    }
+
+    .scan-card .scan-icon {
+        font-size: 4rem;
+        color: #f39c12;
+        display: block;
+        margin-bottom: 12px;
+    }
+
+    .scan-card h2 {
+        color: #1a202c;
+        margin-bottom: 8px;
+    }
+
+    .order-details {
+        background: #f7fafc;
+        padding: 16px;
+        border-radius: 8px;
+        margin: 16px 0;
+        text-align: left;
+    }
+
+    .order-details .row {
+        display: flex;
+        justify-content: space-between;
+        padding: 6px 0;
+        border-bottom: 1px solid #edf2f7;
+    }
+
+    .order-details .row:last-child {
+        border-bottom: none;
+    }
+
+    .status-badge {
+        padding: 4px 14px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .status-badge.pending { background: #fefcbf; color: #975a16; }
+    .status-badge.processing { background: #bee3f8; color: #2a69ac; }
+    .status-badge.shipped { background: #c6f6d5; color: #276749; }
+    .status-badge.delivered { background: #9ae6b4; color: #22543d; }
+    .status-badge.cancelled { background: #fed7d7; color: #9b2c2c; }
+
+    .action-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+        gap: 12px;
+        margin: 20px 0;
+    }
+
+    .action-btn {
+        padding: 12px;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+
+    .action-btn:hover {
+        transform: translateY(-2px);
+    }
+
+    .action-btn.process {
+        background: #bee3f8;
+        color: #2a69ac;
+    }
+
+    .action-btn.process:hover {
+        background: #3182ce;
+        color: white;
+    }
+
+    .action-btn.ship {
+        background: #c6f6d5;
+        color: #276749;
+    }
+
+    .action-btn.ship:hover {
+        background: #27ae60;
+        color: white;
+    }
+
+    .action-btn.deliver {
+        background: #9ae6b4;
+        color: #22543d;
+    }
+
+    .action-btn.deliver:hover {
+        background: #2ecc71;
+        color: white;
+    }
+
+    .action-btn.cancel {
+        background: #fed7d7;
+        color: #9b2c2c;
+    }
+
+    .action-btn.cancel:hover {
+        background: #e53e3e;
+        color: white;
+    }
+
+    .action-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none !important;
+    }
+
+    .btn-back {
+        display: inline-block;
+        margin-top: 16px;
+        color: #3182ce;
+        text-decoration: none;
+        font-weight: 600;
+    }
+
+    .info-text {
+        font-size: 0.85rem;
+        color: #718096;
+        margin-top: 12px;
+    }
+</style>
+
+<div class="scan-page">
+    <div class="scan-card">
+        <span class="scan-icon">📋</span>
+        <h2>Order Details</h2>
+        <p style="color: #718096; font-size: 0.95rem;">
+            Scanned by: <strong><%= user.username %></strong>
+            (<%= user.role %>)
+        </p>
+
+        <div class="order-details">
+            <div class="row">
+                <span>Order ID</span>
+                <span style="font-family: monospace; font-size: 0.85rem;">
+                    #<%= order.saleId %>
+                </span>
+            </div>
+            <div class="row">
+                <span>Customer</span>
+                <span><%= order.customerName %></span>
+            </div>
+            <div class="row">
+                <span>Product</span>
+                <span><%= order.productName %></span>
+            </div>
+            <div class="row">
+                <span>Total</span>
+                <span style="font-weight: 700; color: #2b6cb0;">
+                    BDT. <%= order.totalAmount.toFixed(2) %>
+                </span>
+            </div>
+            <div class="row">
+                <span>Status</span>
+                <span>
+                    <span class="status-badge <%= (order.status || 'pending').toLowerCase() %>">
+                        <%= order.status || 'Pending' %>
+                    </span>
+                </span>
+            </div>
+        </div>
+
+     
+        <% if (possibleActions && possibleActions.length > 0) { %>
+            <div class="action-grid">
+                <% possibleActions.forEach(action => { %>
+                    <% if (action === 'processing') { %>
+                        <button class="action-btn process" onclick="updateOrder('<%= order.saleId %>', 'processing')">
+                            <i class="fas fa-cog"></i> Process
+                        </button>
+                    <% } else if (action === 'shipped') { %>
+                        <button class="action-btn ship" onclick="updateOrder('<%= order.saleId %>', 'shipped')">
+                            <i class="fas fa-truck"></i> Ship
+                        </button>
+                    <% } else if (action === 'delivered') { %>
+                        <button class="action-btn deliver" onclick="updateOrder('<%= order.saleId %>', 'delivered')">
+                            <i class="fas fa-check-circle"></i> Deliver
+                        </button>
+                    <% } else if (action === 'cancelled') { %>
+                        <button class="action-btn cancel" onclick="updateOrder('<%= order.saleId %>', 'cancelled')">
+                            <i class="fas fa-times"></i> Cancel
+                        </button>
+                    <% } %>
+                <% }) %>
+            </div>
+        <% } else { %>
+            <div style="padding: 20px; background: #f0fff4; border-radius: 8px; border: 1px solid #c6f6d5;">
+                <p style="color: #276749; margin: 0;">
+                    <i class="fas fa-check-circle"></i>
+                    This order is already completed!
+                </p>
+            </div>
+        <% } %>
+
+        <div class="info-text">
+            <i class="fas fa-info-circle"></i>
+            You are viewing this order via QR scan.
+        </div>
+
+        <a href="/my-orders" class="btn-back">
+            <i class="fas fa-arrow-left"></i> Back
+        </a>
+    </div>
+</div>
+
+<script>
+   
+    function updateOrder(saleId, status) {
+        const statusLabels = {
+            'processing': 'Processing',
+            'shipped': 'Shipped',
+            'delivered': 'Delivered',
+            'cancelled': 'Cancelled'
+        };
+
+        if (!confirm(`Are you sure you want to mark this order as "${statusLabels[status]}"?`)) {
+            return;
+        }
+
+        const $btn = $(`button[onclick*="${saleId}"][onclick*="${status}"]`);
+        const originalText = $btn.html();
+        $btn.html('<i class="fas fa-spinner fa-spin"></i>');
+        $btn.prop('disabled', true);
+
+        $.ajax({
+            url: '/api/order/scan-update',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({ saleId: saleId, status: status }),
+            success: function(response) {
+                if (response.success) {
+                    showNotification('✅ ' + response.message, 'success');
+                    setTimeout(() => {
+                        location.reload();
+                    }, 1000);
+                } else {
+                    showNotification('❌ ' + response.message, 'error');
+                }
+            },
+            error: function(xhr) {
+                const msg = xhr.responseJSON?.message || 'Failed to update';
+                showNotification('❌ ' + msg, 'error');
+            },
+            complete: function() {
+                $btn.html(originalText);
+                $btn.prop('disabled', false);
+            }
+        });
+    }
+
+    
+    function showNotification(message, type) {
+        if (typeof window.showNotification === 'function') {
+            window.showNotification(message, type);
+        } else {
+            alert(message);
+        }
+    }
+</script>
+
+<%- include('partials/footer') %>

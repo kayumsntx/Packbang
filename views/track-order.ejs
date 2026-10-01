@@ -1,0 +1,485 @@
+<%- include('partials/header') %>
+
+<style>
+    .track-page {
+        max-width: 800px;
+        margin: 40px auto;
+        padding: 20px;
+    }
+
+    .track-card {
+        background: white;
+        border-radius: 16px;
+        padding: 32px;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.08);
+    }
+
+    .track-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 2px solid #f39c12;
+        padding-bottom: 16px;
+        margin-bottom: 24px;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+
+    .track-header h2 {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        color: #1a202c;
+    }
+
+    .track-header h2 i {
+        color: #f39c12;
+    }
+
+    .order-id-badge {
+        background: #f7fafc;
+        padding: 6px 16px;
+        border-radius: 8px;
+        font-family: monospace;
+        font-size: 0.9rem;
+        color: #4a5568;
+    }
+
+ 
+    .order-info {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 16px;
+        margin-bottom: 20px;
+        padding: 16px;
+        background: #f7fafc;
+        border-radius: 12px;
+    }
+
+    .order-info .info-item {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .order-info .info-item .label {
+        font-size: 0.75rem;
+        color: #718096;
+        text-transform: uppercase;
+        font-weight: 600;
+        letter-spacing: 0.3px;
+    }
+
+    .order-info .info-item .value {
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: #1a202c;
+    }
+
+    /* নতুন কুরিয়ার ইনফো বক্সের ডিজাইন */
+    .courier-info {
+        background: #f0fff4;
+        border: 1px solid #c6f6d5;
+        padding: 20px;
+        border-radius: 12px;
+        margin-bottom: 30px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 16px;
+    }
+
+    .courier-info .details h4 {
+        margin: 0 0 8px 0;
+        color: #276749;
+        font-size: 1.1rem;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .courier-info .details p {
+        margin: 4px 0;
+        color: #2f855a;
+        font-size: 0.95rem;
+    }
+
+    .courier-btn {
+        background: #38a169;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(56, 161, 105, 0.2);
+    }
+
+    .courier-btn:hover {
+        background: #2f855a;
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(56, 161, 105, 0.3);
+    }
+
+    .tracking-steps {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin: 40px 0;
+        position: relative;
+        padding: 0 10px;
+    }
+
+    .tracking-steps::before {
+        content: '';
+        position: absolute;
+        top: 35px;
+        left: 15%;
+        right: 15%;
+        height: 4px;
+        background: #e2e8f0;
+        z-index: 0;
+    }
+
+    .tracking-steps .step {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        z-index: 1;
+        flex: 1;
+    }
+
+    .tracking-steps .step .step-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        color: white;
+        transition: all 0.3s ease;
+        border: 3px solid #e2e8f0;
+        background: white;
+        position: relative;
+    }
+
+    .tracking-steps .step .step-icon.completed {
+        background: #27ae60;
+        border-color: #27ae60;
+        box-shadow: 0 4px 15px rgba(39, 174, 96, 0.3);
+    }
+
+    .tracking-steps .step .step-icon.active {
+        background: #3182ce;
+        border-color: #3182ce;
+        box-shadow: 0 4px 15px rgba(49, 130, 206, 0.3);
+        animation: pulse-step 1.5s infinite;
+    }
+
+    .tracking-steps .step .step-icon.cancelled {
+        background: #e53e3e;
+        border-color: #e53e3e;
+        box-shadow: 0 4px 15px rgba(229, 62, 62, 0.3);
+    }
+
+    @keyframes pulse-step {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.08); }
+    }
+
+    .tracking-steps .step .step-icon i {
+        font-size: 1.2rem;
+    }
+
+    .tracking-steps .step .step-label {
+        margin-top: 10px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: #4a5568;
+        text-align: center;
+    }
+
+    .tracking-steps .step .step-label.active-label {
+        color: #3182ce;
+    }
+
+    .tracking-steps .step .step-label.completed-label {
+        color: #27ae60;
+    }
+
+    .tracking-steps .step .step-label.cancelled-label {
+        color: #e53e3e;
+    }
+
+ 
+    .cancelled-status {
+        text-align: center;
+        padding: 30px;
+        background: #fff5f5;
+        border-radius: 12px;
+        border: 2px solid #fed7d7;
+        margin: 20px 0;
+    }
+
+    .cancelled-status i {
+        font-size: 3rem;
+        color: #e53e3e;
+        display: block;
+        margin-bottom: 12px;
+    }
+
+    .cancelled-status h3 {
+        color: #9b2c2c;
+        margin-bottom: 8px;
+    }
+
+    .cancelled-status p {
+        color: #718096;
+    }
+
+
+    .product-summary {
+        margin-top: 30px;
+        padding-top: 20px;
+        border-top: 2px solid #edf2f7;
+    }
+
+    .product-summary .product-item {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 12px 0;
+        border-bottom: 1px solid #f7fafc;
+    }
+
+    .product-summary .product-item:last-child {
+        border-bottom: none;
+    }
+
+    .product-summary .product-item img {
+        width: 60px;
+        height: 60px;
+        object-fit: cover;
+        border-radius: 8px;
+        border: 1px solid #e2e8f0;
+    }
+
+    .product-summary .product-item .details {
+        flex: 1;
+    }
+
+    .product-summary .product-item .details .name {
+        font-weight: 600;
+        color: #2d3748;
+    }
+
+    .product-summary .product-item .details .meta {
+        font-size: 0.85rem;
+        color: #718096;
+    }
+
+    .product-summary .product-item .price {
+        font-weight: 700;
+        color: #2b6cb0;
+    }
+
+ 
+    .back-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        color: #3182ce;
+        text-decoration: none;
+        font-weight: 600;
+        margin-top: 20px;
+        transition: color 0.3s ease;
+    }
+
+    .back-btn:hover {
+        color: #2b6cb0;
+        text-decoration: underline;
+    }
+
+
+    @media (max-width: 768px) {
+        .track-page {
+            padding: 12px;
+        }
+
+        .track-card {
+            padding: 20px;
+        }
+
+        .tracking-steps {
+            flex-direction: column;
+            gap: 20px;
+            padding: 0;
+        }
+
+        .tracking-steps::before {
+            display: none;
+        }
+
+        .tracking-steps .step {
+            flex-direction: row;
+            width: 100%;
+            gap: 16px;
+            padding: 10px 16px;
+            background: #f7fafc;
+            border-radius: 10px;
+        }
+
+        .tracking-steps .step .step-icon {
+            width: 40px;
+            height: 40px;
+            font-size: 1rem;
+            flex-shrink: 0;
+        }
+
+        .tracking-steps .step .step-label {
+            margin-top: 0;
+            text-align: left;
+        }
+
+        .order-info {
+            grid-template-columns: 1fr;
+            gap: 8px;
+        }
+
+        .product-summary .product-item {
+            flex-wrap: wrap;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .track-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+    }
+</style>
+
+<div class="track-page">
+    <div class="track-card">
+        <!-- Header -->
+        <div class="track-header">
+            <h2>
+                <i class="fas fa-map-marked-alt"></i> Track Order
+            </h2>
+            <span class="order-id-badge">#<%= order.saleId %></span>
+        </div>
+
+      
+        <div class="order-info">
+            <div class="info-item">
+                <span class="label"><i class="fas fa-calendar-alt"></i> Date</span>
+                <span class="value"><%= new Date(order.saleDate).toLocaleString('en-BD', {
+                    day: '2-digit',
+                    month: 'short',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                }) %></span>
+            </div>
+            <div class="info-item">
+                <span class="label"><i class="fas fa-user"></i> Customer</span>
+                <span class="value"><%= order.customerName %></span>
+            </div>
+            <div class="info-item">
+                <span class="label"><i class="fas fa-tag"></i> Status</span>
+                <span class="value">
+                    <span class="status-badge <%= currentStatus.toLowerCase() %>" style="display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; text-transform: uppercase;">
+                        <%= currentStatus %>
+                    </span>
+                </span>
+            </div>
+            <div class="info-item">
+                <span class="label"><i class="fas fa-money-bill-wave"></i> Total</span>
+                <span class="value" style="color: #2b6cb0;">BDT. <%= order.totalAmount.toFixed(2) %></span>
+            </div>
+        </div>
+
+        <!-- 🚀 NEW: Steadfast Courier Info Box 🚀 -->
+        <% if (order.courier && order.courier.consignmentId) { %>
+            <div class="courier-info">
+                <div class="details">
+                    <h4><i class="fas fa-shipping-fast"></i> Courier Delivery Info</h4>
+                    <p><strong>Tracking No:</strong> <%= order.courier.trackingCode %></p>
+                    <p><strong>Current Status:</strong> <span style="text-transform: capitalize;"><%= order.courier.status || 'Pending' %></span></p>
+                </div>
+                <% if (order.courier.trackingCode) { %>
+                    <a href="https://steadfast.com.bd/t/<%= order.courier.trackingCode %>" target="_blank" class="courier-btn">
+                        <i class="fas fa-location-arrow"></i> Track Live Location
+                    </a>
+                <% } %>
+            </div>
+        <% } %>
+        <!-- 🚀 END Courier Info Box 🚀 -->
+
+  
+        <% if (currentStatus.toLowerCase() === 'cancelled') { %>
+            <div class="cancelled-status">
+                <i class="fas fa-times-circle"></i>
+                <h3>Order Cancelled</h3>
+                <p>This order has been cancelled and will not be delivered.</p>
+            </div>
+        <% } else { %>
+            <div class="tracking-steps">
+                <% 
+                    const steps = [
+                        { key: 'pending', label: 'Order Placed', icon: 'fa-clock' },
+                        { key: 'processing', label: 'Processing', icon: 'fa-spinner' },
+                        { key: 'shipped', label: 'Shipped', icon: 'fa-truck' },
+                        { key: 'delivered', label: 'Delivered', icon: 'fa-check-circle' }
+                    ];
+                    
+                    const currentIndex = steps.findIndex(s => s.key === currentStatus.toLowerCase());
+                %>
+                
+                <% steps.forEach((step, index) => { 
+                    const isCompleted = index < currentIndex;
+                    const isActive = index === currentIndex;
+                %>
+                    <div class="step">
+                        <div class="step-icon <%= isCompleted ? 'completed' : '' %> <%= isActive ? 'active' : '' %>">
+                            <i class="fas <%= step.icon %>"></i>
+                        </div>
+                        <span class="step-label <%= isCompleted ? 'completed-label' : '' %> <%= isActive ? 'active-label' : '' %>">
+                            <%= step.label %>
+                        </span>
+                    </div>
+                <% }) %>
+            </div>
+        <% } %>
+
+   
+        <div class="product-summary">
+            <h4 style="color: #1a202c; margin-bottom: 12px;">
+                <i class="fas fa-box"></i> Product Summary
+            </h4>
+            <div class="product-item">
+                <img src="<%= order.imagePath || '/uploads/default.jpg' %>" alt="<%= order.productName %>" />
+                <div class="details">
+                    <div class="name"><%= order.productName %></div>
+                    <div class="meta">
+                        Price: BDT. <%= order.price.toFixed(2) %> × <%= order.quantity %>
+                    </div>
+                </div>
+                <div class="price">BDT. <%= order.totalAmount.toFixed(2) %></div>
+            </div>
+        </div>
+
+  
+        <a href="/my-orders" class="back-btn">
+            <i class="fas fa-arrow-left"></i> Back to Orders
+        </a>
+    </div>
+</div>
+
+<%- include('partials/footer') %>

@@ -1,0 +1,607 @@
+<%- include('partials/header') %>
+
+<style>
+
+    .sales-page {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+    .sales-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 3px solid #f39c12;
+        padding-bottom: 16px;
+        margin-bottom: 24px;
+        flex-wrap: wrap;
+        gap: 16px;
+    }
+
+    .sales-header h2 {
+        margin: 0;
+        color: #1a202c;
+        font-size: 1.6rem;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .sales-header h2 i {
+        color: #f39c12;
+    }
+
+    .sales-header .sales-stats {
+        display: flex;
+        gap: 20px;
+        flex-wrap: wrap;
+    }
+
+    .sales-header .sales-stats .stat-item {
+        background: #f7fafc;
+        padding: 8px 18px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #4a5568;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .sales-header .sales-stats .stat-item i {
+        color: #f39c12;
+    }
+
+    .sales-header .sales-stats .stat-item .stat-value {
+        color: #2b6cb0;
+        font-size: 1rem;
+    }
+
+  
+    .sales-toolbar {
+        display: flex;
+        gap: 14px;
+        margin-bottom: 24px;
+        flex-wrap: wrap;
+        align-items: center;
+        background: #f7fafc;
+        padding: 16px 20px;
+        border-radius: 12px;
+        border: 1px solid #e2e8f0;
+    }
+
+    .sales-toolbar .search-box {
+        flex: 1;
+        min-width: 200px;
+        display: flex;
+        position: relative;
+    }
+
+    .sales-toolbar .search-box input {
+        width: 100%;
+        padding: 10px 16px 10px 40px;
+        border: 2px solid #e2e8f0;
+        border-radius: 8px;
+        font-size: 0.95rem;
+        outline: none;
+        transition: all 0.3s ease;
+        background: white;
+    }
+
+    .sales-toolbar .search-box input:focus {
+        border-color: #3182ce;
+        box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.2);
+    }
+
+    .sales-toolbar .search-box .search-icon {
+        position: absolute;
+        left: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #a0aec0;
+    }
+
+    .sales-toolbar .filter-group {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+    }
+
+    .sales-toolbar .filter-group select {
+        padding: 10px 14px;
+        border: 2px solid #e2e8f0;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        outline: none;
+        background: white;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .sales-toolbar .filter-group select:focus {
+        border-color: #3182ce;
+        box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.2);
+    }
+
+    .sales-toolbar .btn-export {
+        padding: 10px 20px;
+        background: linear-gradient(45deg, #27ae60, #2ecc71);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .sales-toolbar .btn-export:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(46, 204, 113, 0.4);
+    }
+
+  
+    .log-container {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 2px 15px rgba(0, 0, 0, 0.05);
+        padding: 0;
+        overflow: hidden;
+        border: 1px solid #e2e8f0;
+    }
+
+    .log-container .table-wrapper {
+        overflow-x: auto;
+        padding: 0;
+    }
+
+    .log-container table {
+        width: 100%;
+        border-collapse: collapse;
+        text-align: left;
+        font-size: 0.9rem;
+    }
+
+    .log-container table thead {
+        background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+        border-bottom: 2px solid #e2e8f0;
+    }
+
+    .log-container table thead th {
+        padding: 14px 18px;
+        font-weight: 700;
+        color: #4a5568;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        white-space: nowrap;
+        border-bottom: 2px solid #e2e8f0;
+    }
+
+    .log-container table thead th i {
+        margin-right: 6px;
+        color: #718096;
+    }
+
+    .log-container table tbody tr {
+        transition: background 0.2s ease;
+        border-bottom: 1px solid #edf2f7;
+    }
+
+    .log-container table tbody tr:hover {
+        background: #f7fafc;
+    }
+
+    .log-container table tbody tr:last-child {
+        border-bottom: none;
+    }
+
+    .log-container table tbody td {
+        padding: 14px 18px;
+        vertical-align: middle;
+        color: #2d3748;
+    }
+
+    .log-container .badge-receipt {
+        background: #e6fffa;
+        color: #234e52;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-family: 'Courier New', monospace;
+        font-size: 0.8rem;
+        font-weight: 600;
+        display: inline-block;
+        white-space: nowrap;
+    }
+
+    .log-container .img-thumb {
+        width: 45px;
+        height: 45px;
+        object-fit: cover;
+        border-radius: 8px;
+        border: 1px solid #e2e8f0;
+        background: #f7fafc;
+    }
+
+    .log-container .product-name {
+        font-weight: 600;
+        color: #1a202c;
+    }
+
+    .log-container .price-amount {
+        font-weight: 600;
+        color: #2b6cb0;
+    }
+
+    .log-container .total-amount {
+        font-weight: 700;
+        color: #27ae60;
+        font-size: 1rem;
+    }
+
+    .log-container .qty-badge {
+        background: #edf2f7;
+        padding: 2px 10px;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 0.85rem;
+        color: #4a5568;
+        display: inline-block;
+    }
+
+    .log-container .timestamp {
+        color: #718096;
+        font-size: 0.8rem;
+        white-space: nowrap;
+    }
+
+
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #a0aec0;
+    }
+
+    .empty-state i {
+        font-size: 4rem;
+        color: #e2e8f0;
+        display: block;
+        margin-bottom: 16px;
+    }
+
+    .empty-state h3 {
+        color: #4a5568;
+        margin-bottom: 8px;
+        font-size: 1.2rem;
+    }
+
+    .empty-state p {
+        font-size: 0.95rem;
+    }
+
+    .empty-state .btn-primary {
+        display: inline-block;
+        margin-top: 16px;
+        padding: 12px 28px;
+        background: linear-gradient(45deg, #3182ce, #2b6cb0);
+        color: white;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .empty-state .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(49, 130, 206, 0.4);
+    }
+
+    @media (max-width: 768px) {
+        .sales-page {
+            padding: 12px;
+        }
+
+        .sales-header {
+            flex-direction: column;
+            align-items: stretch;
+            text-align: center;
+        }
+
+        .sales-header .sales-stats {
+            justify-content: center;
+        }
+
+        .sales-toolbar {
+            flex-direction: column;
+            align-items: stretch;
+            padding: 14px 16px;
+        }
+
+        .sales-toolbar .search-box {
+            min-width: unset;
+        }
+
+        .sales-toolbar .filter-group {
+            flex-wrap: wrap;
+        }
+
+        .sales-toolbar .filter-group select {
+            flex: 1;
+            min-width: 120px;
+        }
+
+        .log-container table {
+            font-size: 0.8rem;
+        }
+
+        .log-container table thead th,
+        .log-container table tbody td {
+            padding: 10px 12px;
+        }
+
+        .log-container .img-thumb {
+            width: 32px;
+            height: 32px;
+        }
+
+        .log-container .badge-receipt {
+            font-size: 0.7rem;
+            padding: 2px 8px;
+        }
+
+        .sales-header .sales-stats .stat-item {
+            font-size: 0.75rem;
+            padding: 6px 12px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .sales-header h2 {
+            font-size: 1.2rem;
+        }
+
+        .sales-header .sales-stats {
+            gap: 8px;
+        }
+
+        .log-container table thead th,
+        .log-container table tbody td {
+            padding: 8px 10px;
+            font-size: 0.75rem;
+        }
+
+        .log-container .img-thumb {
+            width: 28px;
+            height: 28px;
+        }
+    }
+</style>
+
+
+<div class="sales-page">
+
+ 
+    <div class="sales-header">
+        <h2>
+            <i class="fas fa-history"></i> Sales Journal Archive
+        </h2>
+
+        <div class="sales-stats">
+            <div class="stat-item">
+                <i class="fas fa-receipt"></i>
+                Total Sales: <span class="stat-value"><%= sales.length %></span>
+            </div>
+            <% if (sales.length > 0) { 
+                var totalRevenue = 0;
+                sales.forEach(function(sale) { totalRevenue += sale.totalAmount; });
+            %>
+                <div class="stat-item">
+                    <i class="fas fa-money-bill-wave"></i>
+                    Revenue: <span class="stat-value">BDT. <%= totalRevenue.toFixed(2) %></span>
+                </div>
+            <% } %>
+        </div>
+    </div>
+
+
+    <div class="sales-toolbar">
+        <div class="search-box">
+            <i class="fas fa-search search-icon"></i>
+            <input
+                type="text"
+                id="salesSearch"
+                placeholder="Search by product, receipt, or customer..."
+                autocomplete="off"
+            />
+        </div>
+        <div class="filter-group">
+            <select id="sortFilter">
+                <option value="newest">🔽 Newest First</option>
+                <option value="oldest">🔼 Oldest First</option>
+                <option value="highest">💰 Highest Amount</option>
+                <option value="lowest">💸 Lowest Amount</option>
+            </select>
+            <button class="btn-export" onclick="exportSales()">
+                <i class="fas fa-file-export"></i> Export CSV
+            </button>
+        </div>
+    </div>
+
+
+    <div class="log-container">
+        <% if (sales.length === 0) { %>
+            <div class="empty-state">
+                <i class="fas fa-receipt"></i>
+                <h3>No Sales Transactions Yet</h3>
+                <p>Sales records will appear here once you complete your first transaction.</p>
+                <a href="/terminal" class="btn-primary">
+                    <i class="fas fa-cash-register"></i> Start Selling
+                </a>
+            </div>
+        <% } else { %>
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th><i class="fas fa-hashtag"></i> Receipt</th>
+                            <th><i class="fas fa-image"></i> Image</th>
+                            <th><i class="fas fa-tag"></i> Product</th>
+                            <th><i class="fas fa-money-bill"></i> Price</th>
+                            <th><i class="fas fa-times"></i> Qty</th>
+                            <th><i class="fas fa-calculator"></i> Total</th>
+                            <th><i class="fas fa-clock"></i> Date</th>
+                        </tr>
+                    </thead>
+                    <tbody id="salesTableBody">
+                        <% sales.forEach(function(sale, index) { %>
+                            <tr data-index="<%= index %>">
+                                <td>
+                                    <span class="badge-receipt">
+                                        #<%= sale.saleId ? sale.saleId.substring(0, 10) : 'N/A' %>
+                                    </span>
+                                </td>
+                                <td>
+                                    <img
+                                        src="<%= sale.imagePath || '/uploads/default.jpg' %>"
+                                        class="img-thumb"
+                                        alt="<%= sale.productName %>"
+                                        onerror="this.src='/uploads/default.jpg'"
+                                    />
+                                </td>
+                                <td>
+                                    <span class="product-name"><%= sale.productName || 'Unknown Product' %></span>
+                                </td>
+                                <td>
+                                    <span class="price-amount">BDT. <%= (sale.price || 0).toFixed(2) %></span>
+                                </td>
+                                <td>
+                                    <span class="qty-badge">× <%= sale.quantity || 0 %></span>
+                                </td>
+                                <td>
+                                    <span class="total-amount">BDT. <%= (sale.totalAmount || 0).toFixed(2) %></span>
+                                </td>
+                                <td>
+                                    <span class="timestamp">
+                                        <i class="far fa-calendar-alt"></i>
+                                        <%= new Date(sale.saleDate || Date.now()).toLocaleString('en-BD', {
+                                            day: '2-digit',
+                                            month: 'short',
+                                            year: 'numeric',
+                                            hour: '2-digit',
+                                            minute: '2-digit'
+                                        }) %>
+                                    </span>
+                                </td>
+                            </tr>
+                        <% }) %>
+                    </tbody>
+                </table>
+            </div>
+        <% } %>
+    </div>
+</div>
+
+<script>
+$(document).ready(function() {
+
+    $('#salesSearch').on('keyup', function() {
+        var searchText = $(this).val().toLowerCase().trim();
+
+        $('#salesTableBody tr').each(function() {
+            var productName = $(this).find('.product-name').text().toLowerCase();
+            var receipt = $(this).find('.badge-receipt').text().toLowerCase();
+
+            if (productName.indexOf(searchText) > -1 || receipt.indexOf(searchText) > -1) {
+                $(this).show();
+            } else {
+                $(this).hide();
+            }
+        });
+    });
+
+
+    $('#sortFilter').on('change', function() {
+        var sortBy = $(this).val();
+        var rows = $('#salesTableBody tr').get();
+
+        rows.sort(function(a, b) {
+            var aTotal = parseFloat($(a).find('.total-amount').text().replace('BDT. ', ''));
+            var bTotal = parseFloat($(b).find('.total-amount').text().replace('BDT. ', ''));
+            var aDate = new Date($(a).find('.timestamp').text().trim());
+            var bDate = new Date($(b).find('.timestamp').text().trim());
+
+            switch(sortBy) {
+                case 'newest':
+                    return bDate - aDate;
+                case 'oldest':
+                    return aDate - bDate;
+                case 'highest':
+                    return bTotal - aTotal;
+                case 'lowest':
+                    return aTotal - bTotal;
+                default:
+                    return 0;
+            }
+        });
+
+        $.each(rows, function(index, row) {
+            $('#salesTableBody').append(row);
+        });
+    });
+
+    console.log('📊 Sales Log Page Loaded');
+});
+
+
+function exportSales() {
+    var rows = $('#salesTableBody tr:visible');
+    if (rows.length === 0) {
+        alert('No sales data to export!');
+        return;
+    }
+
+ 
+    var headers = [];
+    $('#salesTableBody').closest('table').find('thead th').each(function() {
+        var text = $(this).text().trim().replace(/[^a-zA-Z\s]/g, '').trim();
+        if (text) headers.push(text);
+    });
+
+    
+    var data = [];
+    rows.each(function() {
+        var rowData = [];
+        $(this).find('td').each(function(index) {
+          
+            if (index === 1) return;
+            var text = $(this).text().trim().replace(/,/g, '');
+            if (text) rowData.push(text);
+        });
+        if (rowData.length) data.push(rowData);
+    });
+
+
+    var csv = headers.join(',') + '\n';
+    data.forEach(function(row) {
+        csv += row.join(',') + '\n';
+    });
+
+  
+    var blob = new Blob([csv], { type: 'text/csv' });
+    var link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = 'sales_journal_' + new Date().toISOString().slice(0, 10) + '.csv';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    showNotification('📊 Sales data exported successfully!', 'success');
+}
+</script>
+
+<%- include('partials/footer') %>

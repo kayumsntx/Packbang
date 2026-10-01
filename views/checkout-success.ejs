@@ -1,0 +1,360 @@
+<%- include('partials/header') %>
+
+<style>
+    .success-page {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 75vh;
+        padding: 20px;
+        background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+    }
+
+    .success-card {
+        background: #ffffff;
+        padding: 48px 40px;
+        border-radius: 20px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
+        max-width: 500px;
+        width: 100%;
+        border: 1px solid rgba(226, 232, 240, 0.6);
+        text-align: center;
+        animation: fadeInUp 0.6s ease;
+    }
+
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(30px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .success-icon-wrapper {
+        margin: 0 auto 24px auto;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 90px;
+        height: 90px;
+        background: linear-gradient(135deg, #f0fff4, #c6f6d5);
+        border-radius: 50%;
+        border: 4px solid #48bb78;
+        animation: scaleIcon 0.8s ease;
+    }
+
+    @keyframes scaleIcon {
+        0% { transform: scale(0); opacity: 0; }
+        50% { transform: scale(1.2); }
+        100% { transform: scale(1); opacity: 1; }
+    }
+
+    .success-icon-wrapper i {
+        font-size: 2.8rem;
+        color: #38a169;
+    }
+
+    .order-details {
+        background: #f8fafc;
+        border-radius: 12px;
+        padding: 20px;
+        border: 1px solid #edf2f7;
+        margin-bottom: 32px;
+        text-align: left;
+    }
+
+    .order-details .detail-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 8px 0;
+        border-bottom: 1px solid #edf2f7;
+        font-size: 0.95rem;
+    }
+
+    .order-details .detail-row:last-child {
+        border-bottom: none;
+    }
+
+    .order-details .detail-row .label {
+        color: #718096;
+        font-weight: 500;
+    }
+
+    .order-details .detail-row .value {
+        color: #1a202c;
+        font-weight: 600;
+    }
+
+    .order-details .detail-row .value.highlight {
+        color: #2b6cb0;
+        font-size: 1.1rem;
+    }
+
+    .btn-group-success {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    .btn-group-success .btn {
+        flex: 1;
+        min-width: 130px;
+        padding: 14px 20px;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        text-decoration: none;
+        text-align: center;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        border: none;
+        cursor: pointer;
+    }
+
+    .btn-group-success .btn-primary {
+        background: linear-gradient(135deg, #3182ce 0%, #2b6cb0 100%);
+        color: #ffffff;
+        box-shadow: 0 4px 14px rgba(49, 130, 206, 0.3);
+    }
+
+    .btn-group-success .btn-primary:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 25px rgba(49, 130, 206, 0.4);
+    }
+
+    .btn-group-success .btn-secondary {
+        background: #ffffff;
+        color: #4a5568;
+        border: 2px solid #e2e8f0;
+    }
+
+    .btn-group-success .btn-secondary:hover {
+        background: #f7fafc;
+        border-color: #cbd5e0;
+        transform: translateY(-2px);
+    }
+
+    .btn-group-success .btn-success {
+        background: linear-gradient(135deg, #27ae60, #2ecc71);
+        color: #ffffff;
+        box-shadow: 0 4px 14px rgba(46, 204, 113, 0.3);
+    }
+
+    .btn-group-success .btn-success:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 25px rgba(46, 204, 113, 0.4);
+    }
+
+    .footer-link {
+        margin-top: 28px;
+        text-align: center;
+    }
+
+    .footer-link a {
+        color: #a0aec0;
+        text-decoration: none;
+        font-size: 0.85rem;
+        font-weight: 500;
+        transition: color 0.15s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .footer-link a:hover {
+        color: #718096;
+    }
+
+    .confetti-container {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 999;
+        overflow: hidden;
+    }
+
+    .confetti {
+        position: absolute;
+        width: 10px;
+        height: 10px;
+        border-radius: 2px;
+        animation: confettiFall linear forwards;
+    }
+
+    @keyframes confettiFall {
+        0% { opacity: 1; transform: translateY(-100px) rotate(0deg); }
+        100% { opacity: 0; transform: translateY(100vh) rotate(720deg); }
+    }
+
+    @media (max-width: 640px) {
+        .success-card { padding: 32px 24px; }
+        .btn-group-success { flex-direction: column; }
+        .btn-group-success .btn { min-width: unset; width: 100%; }
+        .success-icon-wrapper { width: 70px; height: 70px; }
+        .success-icon-wrapper i { font-size: 2rem; }
+        .order-details .detail-row { font-size: 0.85rem; flex-wrap: wrap; gap: 4px; }
+    }
+
+    @media (max-width: 400px) {
+        .success-card { padding: 24px 16px; }
+        .success-card h2 { font-size: 1.4rem; }
+    }
+</style>
+
+<div class="confetti-container" id="confettiContainer"></div>
+
+<div class="success-page">
+    <div class="success-card">
+        <!-- Icon -->
+        <div class="success-icon-wrapper">
+            <i class="fas fa-check-circle"></i>
+        </div>
+
+        
+        <h2 style="margin: 0 0 8px 0; color: #1a202c; font-size: 1.75rem; font-weight: 800; letter-spacing: -0.5px;">
+            🎉 Transaction Complete!
+        </h2>
+
+        <p style="color: #718096; margin: 0 0 24px 0; font-size: 0.95rem; line-height: 1.6;">
+            Your order has been processed successfully.<br />
+            All inventory metrics have been saved to the local ledger.
+        </p>
+
+      
+        <div class="order-details">
+            <div class="detail-row">
+                <span class="label"><i class="far fa-calendar-alt"></i> Date</span>
+                <span class="value"><%= new Date().toLocaleString('en-BD', { 
+                    day: 'numeric', 
+                    month: 'long', 
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                }) %></span>
+            </div>
+            <div class="detail-row">
+                <span class="label"><i class="far fa-user"></i> Customer</span>
+                <span class="value"><%= customerName || 'Valued Customer' %></span>
+            </div>
+            <div class="detail-row">
+                <span class="label"><i class="fas fa-map-marker-alt"></i> Address</span>
+                <span class="value"><%= customerAddress || 'Walk-in Counter Sale' %></span>
+            </div>
+            <div class="detail-row" style="border-top: 2px solid #e2e8f0; padding-top: 12px; margin-top: 4px;">
+                <span class="label" style="font-weight: 700;">Total Amount</span>
+                <span class="value highlight">BDT. <%= totalAmount || '0.00' %></span>
+            </div>
+            <% if (saleId) { %>
+            <div class="detail-row" style="border-top: 1px solid #edf2f7; padding-top: 8px; margin-top: 4px;">
+                <span class="label" style="font-weight: 600;"><i class="fas fa-hashtag"></i> Order ID</span>
+                <span class="value" style="font-family: monospace; font-size: 0.85rem; color: #2b6cb0;">#<%= saleId %></span>
+            </div>
+            <% } %>
+        </div>
+
+    
+        <div class="btn-group-success">
+            <% if (saleId) { %>
+                <a href="/packing-slip/<%= saleId %>" class="btn btn-success">
+                    <i class="fas fa-print"></i> Print Receipt
+                </a>
+            <% } %>
+            
+            <% 
+                const isCashierOrAdmin = typeof user !== 'undefined' && user && 
+                    (user.role === 'admin' || user.role === 'authorized_cashier' || 
+                     user.username === 'admin' || user.isSuperAdmin === true);
+                const redirectUrl = isCashierOrAdmin ? '/terminal' : '/';
+            %>
+            
+            <a href="<%= redirectUrl %>" class="btn btn-primary">
+                <i class="fas fa-plus-circle"></i> New Transaction
+            </a>
+            
+            <a href="/logout" class="btn btn-secondary">
+                <i class="fas fa-sign-out-alt"></i> Exit & Log Out
+            </a>
+        </div>
+
+        
+        <div class="footer-link">
+            <a href="/sales">
+                <i class="fas fa-chart-bar"></i> View Archived Sales Invoices
+            </a>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script>
+    $(document).ready(function() {
+
+        function createConfetti() {
+            const container = document.getElementById('confettiContainer');
+            const colors = ['#f39c12', '#e74c3c', '#3498db', '#2ecc71', '#9b59b6', '#1abc9c', '#e67e22', '#e74c3c'];
+            const shapes = ['■', '●', '▲', '★', '♦'];
+
+            for (let i = 0; i < 80; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.textContent = shapes[Math.floor(Math.random() * shapes.length)];
+                confetti.style.left = Math.random() * 100 + '%';
+                confetti.style.color = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.fontSize = (Math.random() * 12 + 8) + 'px';
+                confetti.style.animationDuration = (Math.random() * 2 + 2) + 's';
+                confetti.style.animationDelay = (Math.random() * 2) + 's';
+                container.appendChild(confetti);
+            }
+
+            setTimeout(() => {
+                container.innerHTML = '';
+            }, 5000);
+        }
+
+        createConfetti();
+
+    
+        if (typeof updateCartCount === 'function') {
+            updateCartCount();
+        } else {
+            $('#cartCount').text('0').addClass('zero');
+            $('#mobileCartCount').text('0');
+        }
+
+  
+        try {
+            localStorage.removeItem('guestCartBackup');
+            sessionStorage.removeItem('guestCart');
+            localStorage.removeItem('cart');
+        } catch(e) {}
+
+        console.log('✅ Checkout Success Page Loaded!');
+        console.log('📦 Cart has been cleared.');
+    });
+
+
+    app.get("/checkout-success", requireAuth, (req, res) => {
+  const saleId = req.session.lastSaleId || null;
+  
+  console.log("📄 Checkout Success Page");
+  console.log("👤 Customer:", req.session.lastCustomerName);
+  console.log("🆔 Order ID:", saleId);
+  console.log("💰 Total:", req.session.lastTotalAmount);
+  
+  res.render("checkout-success", {
+    customerName: req.session.lastCustomerName || 'Valued Customer',
+    customerEmail: req.session.lastCustomerEmail || 'Not provided',
+    customerPhone: req.session.lastCustomerPhone || 'Not provided',
+    customerAddress: req.session.lastCustomerAddress || 'Walk-in Counter Sale',
+    totalAmount: req.session.lastTotalAmount || '0.00',
+    saleId: saleId,
+    user: req.session.user
+  });
+});
+</script>
+
+<%- include('partials/footer') %>

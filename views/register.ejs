@@ -1,0 +1,387 @@
+<%- include('partials/header') %>
+
+<style>
+
+    .register-page {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 75vh;
+        padding: 20px;
+        background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+    }
+
+    .register-card {
+        background: #ffffff;
+        padding: 40px 36px;
+        border-radius: 20px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
+        max-width: 420px;
+        width: 100%;
+        border: 1px solid rgba(226, 232, 240, 0.6);
+        animation: fadeInUp 0.5s ease;
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .register-card .register-header {
+        text-align: center;
+        margin-bottom: 28px;
+    }
+
+    .register-card .register-header .register-icon {
+        font-size: 3.2rem;
+        color: #48bb78;
+        margin-bottom: 10px;
+        display: block;
+    }
+
+    .register-card .register-header h2 {
+        margin: 0;
+        color: #1a202c;
+        font-size: 1.6rem;
+        font-weight: 700;
+    }
+
+    .register-card .register-header p {
+        color: #718096;
+        margin-top: 6px;
+        font-size: 0.95rem;
+    }
+
+ 
+    .register-card .alert {
+        padding: 12px 16px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-weight: 500;
+        border-left: 4px solid;
+    }
+
+    .register-card .alert-error {
+        background: #fff5f5;
+        color: #c53030;
+        border-color: #fc8181;
+    }
+
+    .register-card .alert-success {
+        background: #f0fff4;
+        color: #276749;
+        border-color: #48bb78;
+    }
+
+ 
+    .register-card .form-group {
+        margin-bottom: 18px;
+    }
+
+    .register-card .form-group label {
+        display: block;
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: #4a5568;
+        margin-bottom: 6px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .register-card .form-group label i {
+        margin-right: 6px;
+        color: #718096;
+    }
+
+    .register-card .form-group input {
+        width: 100%;
+        padding: 12px 16px;
+        border: 2px solid #e2e8f0;
+        border-radius: 10px;
+        font-size: 0.95rem;
+        outline: none;
+        transition: all 0.3s ease;
+        box-sizing: border-box;
+        background: #f7fafc;
+    }
+
+    .register-card .form-group input:focus {
+        border-color: #48bb78;
+        background: white;
+        box-shadow: 0 0 0 4px rgba(72, 187, 120, 0.15);
+    }
+
+    .register-card .form-group input::placeholder {
+        color: #a0aec0;
+    }
+
+    .password-strength {
+        margin-top: 6px;
+        display: flex;
+        gap: 6px;
+        align-items: center;
+    }
+
+    .password-strength .strength-bar {
+        flex: 1;
+        height: 4px;
+        border-radius: 4px;
+        background: #e2e8f0;
+        transition: all 0.3s ease;
+    }
+
+    .password-strength .strength-bar.active {
+        background: #48bb78;
+    }
+
+    .password-strength .strength-text {
+        font-size: 0.7rem;
+        color: #a0aec0;
+        font-weight: 600;
+        min-width: 50px;
+        text-align: right;
+    }
+
+    .register-card .btn-register {
+        width: 100%;
+        padding: 14px;
+        background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+        color: white;
+        border: none;
+        border-radius: 10px;
+        font-weight: 700;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        box-shadow: 0 4px 15px rgba(72, 187, 120, 0.3);
+        margin-bottom: 16px;
+    }
+
+    .register-card .btn-register:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(72, 187, 120, 0.4);
+    }
+
+    .register-card .btn-register:active {
+        transform: translateY(0);
+    }
+
+    .register-card .btn-register i {
+        font-size: 1.1rem;
+    }
+
+
+    .register-card .register-footer {
+        text-align: center;
+        font-size: 0.9rem;
+        color: #718096;
+        border-top: 1px solid #edf2f7;
+        padding-top: 20px;
+    }
+
+    .register-card .register-footer a {
+        color: #3182ce;
+        text-decoration: none;
+        font-weight: 600;
+        transition: color 0.2s ease;
+    }
+
+    .register-card .register-footer a:hover {
+        color: #2b6cb0;
+        text-decoration: underline;
+    }
+
+    .register-card .register-footer .info-text {
+        margin-top: 12px;
+        font-size: 0.8rem;
+        color: #a0aec0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+    }
+
+    .register-card .register-footer .info-text i {
+        color: #f39c12;
+    }
+
+
+    @media (max-width: 480px) {
+        .register-card {
+            padding: 28px 20px;
+        }
+
+        .register-card .register-header h2 {
+            font-size: 1.3rem;
+        }
+
+        .register-card .register-header .register-icon {
+            font-size: 2.5rem;
+        }
+
+        .register-card .form-group input {
+            padding: 10px 14px;
+            font-size: 0.9rem;
+        }
+
+        .register-card .btn-register {
+            padding: 12px;
+            font-size: 0.9rem;
+        }
+    }
+</style>
+
+
+<div class="register-page">
+    <div class="register-card">
+
+        <!-- Header -->
+        <div class="register-header">
+            <span class="register-icon">
+                <i class="fas fa-user-plus"></i>
+            </span>
+            <h2>Create Account</h2>
+            <p>Register a new operator profile</p>
+        </div>
+
+
+
+     
+        <% if (typeof error !== 'undefined' && error) { %>
+            <div class="alert alert-error">
+                <i class="fas fa-exclamation-circle"></i>
+                <%= error %>
+            </div>
+        <% } %>
+
+       
+        <% if (typeof success !== 'undefined' && success) { %>
+            <div class="alert alert-success">
+                <i class="fas fa-check-circle"></i>
+                <%= success %>
+            </div>
+        <% } %>
+
+        <form action="/register" method="POST">
+
+      
+            <div class="form-group">
+                <label for="username">
+                    <i class="fas fa-user"></i> Username
+                </label>
+                <input
+                    type="text"
+                    id="username"
+                    name="username"
+                    placeholder="Choose a username"
+                    required
+                    autofocus
+                />
+            </div>
+
+    
+            <div class="form-group">
+                <label for="password">
+                    <i class="fas fa-key"></i> Password
+                </label>
+                <input
+                    type="password"
+                    id="password"
+                    name="password"
+                    placeholder="Create a strong password"
+                    required
+                />
+              
+                <div class="password-strength" id="passwordStrength">
+                    <span class="strength-bar" id="bar1"></span>
+                    <span class="strength-bar" id="bar2"></span>
+                    <span class="strength-bar" id="bar3"></span>
+                    <span class="strength-text" id="strengthText">Weak</span>
+                </div>
+            </div>
+
+           
+            <button type="submit" class="btn-register">
+                <i class="fas fa-user-plus"></i> Register Account
+            </button>
+        </form>
+
+      
+        <div class="register-footer">
+            <p>
+                Already have an account?
+                <a href="/login">Sign in here</a>
+            </p>
+
+            <div class="info-text">
+                <i class="fas fa-info-circle"></i>
+                <span>Username "admin" will be automatically promoted to Admin</span>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+<script>
+$(document).ready(function() {
+  
+    $('#username').focus();
+
+  
+    $('#password').on('keyup', function() {
+        var password = $(this).val();
+        var strength = 0;
+
+        if (password.length >= 8) strength++;
+        if (password.length >= 12) strength++;
+
+
+        if (/\d/.test(password)) strength++;
+
+        if (/[a-z]/.test(password) && /[A-Z]/.test(password)) strength++;
+
+     
+        if (/[^a-zA-Z0-9]/.test(password)) strength++;
+
+        var bars = $('#bar1, #bar2, #bar3');
+        var texts = ['Weak', 'Weak', 'Fair', 'Good', 'Strong'];
+        var colors = ['#e53e3e', '#e53e3e', '#ed8936', '#48bb78', '#38a169'];
+
+        bars.removeClass('active');
+        var activeBars = Math.min(Math.floor(strength / 2) + 1, 3);
+
+        for (var i = 0; i < activeBars; i++) {
+            bars.eq(i).addClass('active');
+        }
+
+        $('#strengthText').text(texts[strength] || 'Weak');
+        $('#strengthText').css('color', colors[strength] || '#e53e3e');
+    });
+
+   
+    $('#password').on('keypress', function(e) {
+        if (e.which === 13) {
+            $(this).closest('form').submit();
+        }
+    });
+
+    console.log('📝 Register Page Loaded');
+});
+</script>
+
+<%- include('partials/footer') %>

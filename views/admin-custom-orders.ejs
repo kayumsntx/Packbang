@@ -1,0 +1,243 @@
+<%- include('partials/header') %>
+
+<style>
+    .admin-orders-container {
+        max-width: 1200px;
+        margin: 30px auto;
+        padding: 20px;
+    }
+    .admin-orders-container h2 {
+        border-bottom: 2px solid #f39c12;
+        padding-bottom: 12px;
+        margin-bottom: 24px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    .order-card {
+        background: white;
+        border-radius: 12px;
+        border: 1px solid #e2e8f0;
+        padding: 20px;
+        margin-bottom: 16px;
+        transition: all 0.3s ease;
+    }
+    .order-card:hover {
+        box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+    }
+    .order-card .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 10px;
+    }
+    .order-card .title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #2d3748;
+    }
+    .order-card .status {
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+    .status-pending { background: #fefcbf; color: #975a16; }
+    .status-approved { background: #c6f6d5; color: #276749; }
+    .status-rejected { background: #fed7d7; color: #9b2c2c; }
+    .status-assigned { background: #bee3f8; color: #2a69ac; }
+    .status-completed { background: #e9d8fd; color: #6b46c1; }
+    .order-card .meta {
+        font-size: 0.85rem;
+        color: #718096;
+        margin: 6px 0;
+    }
+    .order-card .actions {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-top: 12px;
+    }
+    .order-card .actions button {
+        padding: 6px 16px;
+        border: none;
+        border-radius: 6px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    .btn-approve { background: #27ae60; color: white; }
+    .btn-approve:hover { background: #219653; }
+    .btn-reject { background: #e53e3e; color: white; }
+    .btn-reject:hover { background: #c0392b; }
+    .btn-view { background: #4a5568; color: white; }
+    .btn-view:hover { background: #2d3748; }
+    .bid-list {
+        background: #f7fafc;
+        border-radius: 8px;
+        padding: 12px;
+        margin-top: 12px;
+    }
+    .bid-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 0;
+        border-bottom: 1px solid #edf2f7;
+    }
+    .bid-item:last-child { border-bottom: none; }
+    .bid-item .bid-info { font-size: 0.9rem; }
+    .bid-item .bid-actions button {
+        padding: 2px 12px;
+        border: none;
+        border-radius: 4px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        cursor: pointer;
+    }
+    .bid-accept { background: #27ae60; color: white; }
+    .bid-reject { background: #e53e3e; color: white; }
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #a0aec0;
+    }
+    .empty-state i { font-size: 3rem; display: block; margin-bottom: 12px; }
+</style>
+
+<div class="admin-orders-container">
+    <h2><i class="fas fa-clipboard-list"></i> Custom Orders Management</h2>
+    
+    <div id="ordersList">
+        <div class="empty-state"><i class="fas fa-spinner fa-spin"></i><p>Loading...</p></div>
+    </div>
+</div>
+
+<script>
+    async function loadOrders() {
+        try {
+            const res = await fetch('/api/custom-orders');
+            const data = await res.json();
+            if (data.success) {
+                renderOrders(data.orders);
+            }
+        } catch (err) {
+            console.error(err);
+            document.getElementById('ordersList').innerHTML = `
+                <div class="empty-state"><i class="fas fa-exclamation-circle" style="color:#e53e3e;"></i><p>Failed to load orders</p></div>
+            `;
+        }
+    }
+
+    function renderOrders(orders) {
+        const container = document.getElementById('ordersList');
+        if (!orders || orders.length === 0) {
+            container.innerHTML = `<div class="empty-state"><i class="fas fa-inbox"></i><p>No custom orders yet</p></div>`;
+            return;
+        }
+        
+        let html = '';
+        orders.forEach(order => {
+            const statusClass = 'status-' + order.status;
+            const bidsHtml = order.bids && order.bids.length > 0 ? `
+                <div class="bid-list">
+                    <strong>Bids (${order.bids.length})</strong>
+                    ${order.bids.map(bid => `
+                        <div class="bid-item">
+                            <div class="bid-info">
+                                <strong>${bid.sellerName}</strong> - BDT ${bid.amount} 
+                                ${bid.deliveryTime ? `| Delivery: ${bid.deliveryTime}` : ''}
+                                ${bid.note ? `| Note: ${bid.note}` : ''}
+                                <span style="font-size:0.7rem; color:#718096; margin-left:8px;">${bid.status}</span>
+                            </div>
+                            ${order.status === 'approved' && bid.status === 'pending' ? `
+                                <div class="bid-actions">
+                                    <button class="bid-accept" onclick="handleBid('${order.id}', '${bid._id}', 'accept')">Accept</button>
+                                    <button class="bid-reject" onclick="handleBid('${order.id}', '${bid._id}', 'reject')">Reject</button>
+                                </div>
+                            ` : ''}
+                        </div>
+                    `).join('')}
+                </div>
+            ` : '<div style="font-size:0.85rem; color:#a0aec0; margin-top:8px;">No bids yet</div>';
+            
+            html += `
+                <div class="order-card">
+                    <div class="header">
+                        <span class="title">${order.title}</span>
+                        <span class="status ${statusClass}">${order.status}</span>
+                    </div>
+                    <div class="meta">
+                        <i class="fas fa-user"></i> ${order.customerName} 
+                        | <i class="fas fa-envelope"></i> ${order.customerEmail}
+                        | <i class="fas fa-calendar"></i> ${new Date(order.createdAt).toLocaleDateString()}
+                        ${order.budget ? `| <i class="fas fa-money-bill"></i> BDT ${order.budget}` : ''}
+                    </div>
+                    <div class="meta"><strong>Description:</strong> ${order.description.substring(0, 150)}${order.description.length > 150 ? '...' : ''}</div>
+                    
+                    ${order.status === 'pending' ? `
+                        <div class="actions">
+                            <button class="btn-approve" onclick="updateOrderStatus('${order.id}', 'approved')">Approve</button>
+                            <button class="btn-reject" onclick="updateOrderStatus('${order.id}', 'rejected')">Reject</button>
+                            <button class="btn-view" onclick="window.open('/custom-order/${order.id}', '_blank')">View Details</button>
+                        </div>
+                    ` : `
+                        <div class="actions">
+                            <button class="btn-view" onclick="window.open('/custom-order/${order.id}', '_blank')">View Details</button>
+                        </div>
+                    `}
+                    
+                    ${order.status === 'approved' ? bidsHtml : ''}
+                </div>
+            `;
+        });
+        container.innerHTML = html;
+    }
+
+    async function updateOrderStatus(orderId, status) {
+        if (!confirm(`Are you sure you want to ${status} this order?`)) return;
+        try {
+            const res = await fetch(`/api/admin/custom-order/${orderId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status })
+            });
+            const data = await res.json();
+            if (data.success) {
+                alert('✅ Order ' + status);
+                loadOrders();
+            } else {
+                alert('❌ ' + data.message);
+            }
+        } catch (err) {
+            alert('❌ Failed to update order');
+        }
+    }
+
+    async function handleBid(orderId, bidId, action) {
+        if (!confirm(`Are you sure you want to ${action} this bid?`)) return;
+        try {
+            const res = await fetch(`/api/admin/custom-order/${orderId}/bid/${bidId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action })
+            });
+            const data = await res.json();
+            if (data.success) {
+                alert('✅ Bid ' + action + 'ed');
+                loadOrders();
+            } else {
+                alert('❌ ' + data.message);
+            }
+        } catch (err) {
+            alert('❌ Failed to process bid');
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', loadOrders);
+</script>
+
+<%- include('partials/footer') %>

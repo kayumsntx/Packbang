@@ -1,0 +1,661 @@
+<%- include('partials/header') %>
+
+<style>
+    .orders-dashboard {
+        max-width: 1200px;
+        margin: 40px auto;
+        padding: 20px;
+    }
+
+    .dashboard-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 2px solid #f39c12;
+        padding-bottom: 16px;
+        margin-bottom: 24px;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+
+    .dashboard-header h2 {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        color: #1a202c;
+    }
+
+    .dashboard-header h2 i {
+        color: #f39c12;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        gap: 16px;
+        margin-bottom: 30px;
+    }
+
+    .stat-card {
+        background: white;
+        border-radius: 12px;
+        padding: 16px;
+        border: 1px solid #e2e8f0;
+        text-align: center;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+    }
+
+    .stat-card .number {
+        font-size: 1.8rem;
+        font-weight: 700;
+        display: block;
+    }
+
+    .stat-card .number.pending { color: #f39c12; }
+    .stat-card .number.processing { color: #3182ce; }
+    .stat-card .number.shipped { color: #9b59b6; }
+    .stat-card .number.delivered { color: #27ae60; }
+    .stat-card .number.cancelled { color: #e53e3e; }
+    .stat-card .number.total { color: #1a202c; }
+
+    .stat-card .label {
+        font-size: 0.8rem;
+        color: #718096;
+        margin-top: 4px;
+    }
+
+    .order-table-container {
+        background: white;
+        border-radius: 12px;
+        border: 1px solid #e2e8f0;
+        overflow: hidden;
+    }
+
+    .order-table-container .table-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 16px 20px;
+        background: #f7fafc;
+        border-bottom: 1px solid #e2e8f0;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+
+    .order-table-container .table-header .filter-group {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    .order-table-container .table-header select {
+        padding: 6px 12px;
+        border: 2px solid #e2e8f0;
+        border-radius: 6px;
+        font-size: 0.85rem;
+        outline: none;
+        background: white;
+        cursor: pointer;
+    }
+
+    .order-table-container .table-header select:focus {
+        border-color: #3182ce;
+    }
+
+    .order-table-container table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.9rem;
+    }
+
+    .order-table-container table thead {
+        background: #f7fafc;
+    }
+
+    .order-table-container table thead th {
+        padding: 12px 16px;
+        text-align: left;
+        font-weight: 600;
+        color: #4a5568;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+        border-bottom: 2px solid #e2e8f0;
+    }
+
+    .order-table-container table tbody td {
+        padding: 12px 16px;
+        border-bottom: 1px solid #edf2f7;
+        vertical-align: middle;
+    }
+
+    .order-table-container table tbody tr:hover td {
+        background: #f7fafc;
+    }
+
+    .order-table-container table tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    .status-badge {
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.7rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+        display: inline-block;
+    }
+
+    .status-badge.pending { background: #fefcbf; color: #975a16; }
+    .status-badge.processing { background: #bee3f8; color: #2a69ac; }
+    .status-badge.shipped { background: #c6f6d5; color: #276749; }
+    .status-badge.delivered { background: #9ae6b4; color: #22543d; }
+    .status-badge.cancelled { background: #fed7d7; color: #9b2c2c; }
+
+    .action-btn {
+        padding: 4px 12px;
+        border: none;
+        border-radius: 6px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin: 2px 0;
+    }
+
+    .action-btn:hover {
+        transform: translateY(-1px);
+    }
+
+    .action-btn.process { background: #bee3f8; color: #2a69ac; }
+    .action-btn.process:hover { background: #3182ce; color: white; }
+    .action-btn.ship { background: #c6f6d5; color: #276749; }
+    .action-btn.ship:hover { background: #27ae60; color: white; }
+    .action-btn.deliver { background: #9ae6b4; color: #22543d; }
+    .action-btn.deliver:hover { background: #2ecc71; color: white; }
+    .action-btn.cancel { background: #fed7d7; color: #9b2c2c; }
+    .action-btn.cancel:hover { background: #e53e3e; color: white; }
+
+    .action-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none !important;
+    }
+
+    .btn-slip {
+        background: #27ae60;
+        color: white;
+        border: none;
+        padding: 4px 12px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.75rem;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        margin: 2px 0;
+    }
+
+    .btn-slip:hover {
+        background: #2ecc71;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 15px rgba(46, 204, 113, 0.3);
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 40px;
+        color: #a0aec0;
+    }
+
+    .empty-state i {
+        font-size: 3rem;
+        color: #e2e8f0;
+        display: block;
+        margin-bottom: 12px;
+    }
+
+    /* Courier Modal Styles */
+    .modal-overlay {
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(0, 0, 0, 0.6);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+    }
+    .modal-content {
+        background: white;
+        border-radius: 12px;
+        width: 90%;
+        max-width: 500px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        overflow: hidden;
+    }
+    .modal-header {
+        background: #f7fafc;
+        padding: 16px 20px;
+        border-bottom: 1px solid #e2e8f0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .modal-header h3 {
+        margin: 0;
+        color: #2d3748;
+        font-size: 1.1rem;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .modal-header .close-btn {
+        background: none;
+        border: none;
+        color: #a0aec0;
+        font-size: 1.2rem;
+        cursor: pointer;
+    }
+    .modal-header .close-btn:hover { color: #e53e3e; }
+    .modal-body {
+        padding: 20px;
+    }
+    .modal-body .form-group {
+        margin-bottom: 15px;
+    }
+    .modal-body .form-group label {
+        display: block;
+        margin-bottom: 6px;
+        font-weight: 600;
+        color: #4a5568;
+        font-size: 0.85rem;
+    }
+    .modal-body .form-group input, .modal-body .form-group textarea {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #cbd5e0;
+        border-radius: 6px;
+        font-size: 0.9rem;
+        outline: none;
+        box-sizing: border-box;
+    }
+    .modal-body .form-group input:focus, .modal-body .form-group textarea:focus {
+        border-color: #3182ce;
+        box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.1);
+    }
+    .modal-footer {
+        padding: 16px 20px;
+        border-top: 1px solid #e2e8f0;
+        background: #f7fafc;
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+    }
+
+    @media (max-width: 768px) {
+        .orders-dashboard { padding: 12px; }
+        .stats-grid { grid-template-columns: repeat(3, 1fr); gap: 10px; }
+        .stat-card .number { font-size: 1.2rem; }
+        .order-table-container table { font-size: 0.75rem; }
+        .order-table-container table thead th,
+        .order-table-container table tbody td { padding: 8px 10px; }
+        .action-btn { font-size: 0.65rem; padding: 2px 8px; }
+    }
+
+    @media (max-width: 480px) {
+        .stats-grid { grid-template-columns: repeat(2, 1fr); }
+        .order-table-container .table-header { flex-direction: column; align-items: stretch; }
+    }
+</style>
+
+<div class="orders-dashboard">
+    <div class="dashboard-header">
+        <h2>
+            <i class="fas fa-clipboard-list"></i> Order Management
+        </h2>
+        <span style="color: #718096; font-size: 0.9rem;">
+            <i class="fas fa-user-shield"></i> <%= user.role %>
+        </span>
+    </div>
+
+  
+    <div class="stats-grid">
+        <div class="stat-card" onclick="filterOrders('pending')">
+            <span class="number pending"><%= pendingCount %></span>
+            <span class="label">⏳ Pending</span>
+        </div>
+        <div class="stat-card" onclick="filterOrders('processing')">
+            <span class="number processing"><%= processingCount %></span>
+            <span class="label">🔄 Processing</span>
+        </div>
+        <div class="stat-card" onclick="filterOrders('shipped')">
+            <span class="number shipped"><%= shippedCount %></span>
+            <span class="label">📦 Shipped</span>
+        </div>
+        <div class="stat-card" onclick="filterOrders('delivered')">
+            <span class="number delivered"><%= deliveredCount %></span>
+            <span class="label">✅ Delivered</span>
+        </div>
+        <div class="stat-card" onclick="filterOrders('cancelled')">
+            <span class="number cancelled"><%= cancelledCount %></span>
+            <span class="label">❌ Cancelled</span>
+        </div>
+        <div class="stat-card" onclick="filterOrders('all')">
+            <span class="number total"><%= totalOrders %></span>
+            <span class="label">📊 Total Orders</span>
+        </div>
+    </div>
+
+  
+    <div class="order-table-container">
+        <div class="table-header">
+            <div class="filter-group">
+                <label style="font-weight: 600; color: #4a5568; font-size: 0.85rem;">
+                    <i class="fas fa-filter"></i> Filter:
+                </label>
+                <select id="statusFilter" onchange="filterOrders(this.value)">
+                    <option value="all">All Orders</option>
+                    <option value="pending">Pending</option>
+                    <option value="processing">Processing</option>
+                    <option value="shipped">Shipped</option>
+                    <option value="delivered">Delivered</option>
+                    <option value="cancelled">Cancelled</option>
+                </select>
+            </div>
+            <span style="font-size: 0.85rem; color: #718096;">
+                Showing <strong id="visibleCount"><%= orders.length %></strong> orders
+            </span>
+        </div>
+
+        <div style="overflow-x: auto;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Order ID</th>
+                        <th>Customer</th>
+                        <th>Product</th>
+                        <th>Total</th>
+                        <th>Date</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="ordersTableBody">
+                    <% if (orders && orders.length > 0) { %>
+                        <% orders.forEach(order => { %>
+                            <% const status = order.status || 'Pending'; %>
+                            <% const statusLower = status.toLowerCase(); %>
+                            <tr data-status="<%= statusLower %>">
+                                <td>
+                                    <span style="font-family: monospace; font-size: 0.8rem;">
+                                        <%= order.saleId.substring(0, 13) %>...
+                                    </span>
+                                </td>
+                                <td><%= order.customerName %></td>
+                                <td><%= order.productName %></td>
+                                <td style="font-weight: 600; color: #2b6cb0;">
+                                    BDT. <%= order.totalAmount.toFixed(2) %>
+                                </td>
+                                <td style="font-size: 0.8rem; color: #718096;">
+                                    <%= new Date(order.saleDate).toLocaleDateString() %>
+                                </td>
+                                <td>
+                                    <span class="status-badge <%= statusLower %>">
+                                        <%= status %>
+                                    </span>
+                                </td>
+                                <td>
+                                 
+                                    <% if (statusLower === 'pending') { %>
+                                        <button class="action-btn process" onclick="updateOrderStatus('<%= order.saleId %>', 'processing')">
+                                            <i class="fas fa-cog"></i> Process
+                                        </button>
+                                    <% } else if (statusLower === 'processing') { %>
+                                        <button class="action-btn ship" onclick="updateOrderStatus('<%= order.saleId %>', 'shipped')">
+                                            <i class="fas fa-truck"></i> Ship
+                                        </button>
+                                    <% } else if (statusLower === 'shipped') { %>
+                                        <button class="action-btn deliver" onclick="updateOrderStatus('<%= order.saleId %>', 'delivered')">
+                                            <i class="fas fa-check-circle"></i> Deliver
+                                        </button>
+                                    <% } else if (statusLower === 'delivered' || statusLower === 'cancelled') { %>
+                                        <span style="font-size: 0.75rem; color: #718096;">Completed</span>
+                                    <% } else { %>
+                                        <span style="font-size: 0.75rem; color: #718096;">-</span>
+                                    <% } %>
+                                    
+                                  
+                                    <% if (statusLower !== 'delivered' && statusLower !== 'cancelled') { %>
+                                        <button class="action-btn cancel" onclick="updateOrderStatus('<%= order.saleId %>', 'cancelled')" style="margin-left: 2px;">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    <% } %>
+
+                                
+                                    <% if (statusLower !== 'pending' && statusLower !== 'cancelled') { %>
+                                        <button class="btn-slip" onclick="window.open('/packing-slip/<%= order.saleId %>?print=true', '_blank')" style="margin-top: 2px;">
+                                            <i class="fas fa-file-invoice"></i> Slip
+                                        </button>
+                                    <% } %>
+
+                                    <% if (order.courier && order.courier.consignmentId) { %>
+                                        <div style="margin-top: 4px; font-size: 0.7rem; color: #2f855a;">
+                                            <i class="fas fa-truck"></i> Sent (CID: <%= order.courier.consignmentId %>)
+                                            <% if (order.courier.trackingCode) { %>
+                                                <br>
+                                                <a href="https://steadfast.com.bd/t/<%= order.courier.trackingCode %>" target="_blank" style="color:#2b6cb0;">Track: <%= order.courier.trackingCode %></a>
+                                            <% } %>
+                                        </div>
+                                    <% } else if (statusLower === 'processing' || statusLower === 'shipped') { %>
+                                        <!-- নতুন আপডেট করা বাটন -->
+                                        <button class="action-btn ship" onclick="openCourierModal('<%= order.saleId %>', decodeURIComponent('<%= encodeURIComponent(order.customerName || '') %>'), decodeURIComponent('<%= encodeURIComponent(order.customerPhone || '') %>'), decodeURIComponent('<%= encodeURIComponent(order.customerAddress || '') %>'), '<%= order.totalAmount %>')" style="margin-top: 2px;">
+                                            <i class="fas fa-shipping-fast"></i> Send to Courier
+                                        </button>
+                                    <% } %>
+                                </td>
+                            </tr>
+                        <% }) %>
+                    <% } else { %>
+                        <tr>
+                            <td colspan="7">
+                                <div class="empty-state">
+                                    <i class="fas fa-box-open"></i>
+                                    <p>No orders found.</p>
+                                </div>
+                            </td>
+                        </tr>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Preview & Edit Modal (নতুন যুক্ত করা হয়েছে) -->
+<div id="courierModal" class="modal-overlay" style="display: none;">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3><i class="fas fa-shipping-fast"></i> Steadfast Courier Setup</h3>
+            <button class="close-btn" onclick="closeCourierModal()"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="modal-body">
+            <input type="hidden" id="modalSaleId">
+            <div class="form-group">
+                <label>Customer Name</label>
+                <input type="text" id="modalCustomerName" readonly style="background: #edf2f7; cursor: not-allowed; color: #4a5568;">
+            </div>
+            <div class="form-group">
+                <label>Phone Number (Edit if needed)</label>
+                <input type="text" id="modalCustomerPhone" placeholder="e.g. 017XXXXXXXX">
+            </div>
+            <div class="form-group">
+                <label>Delivery Address (Edit if needed)</label>
+                <textarea id="modalCustomerAddress" rows="3" placeholder="Enter full delivery address"></textarea>
+            </div>
+            <div class="form-group">
+                <label>COD Amount (BDT)</label>
+                <input type="number" id="modalCodAmount" step="0.01">
+                <small style="color: #718096; margin-top: 4px; display: block;">Set to 0 if the customer has already paid.</small>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="action-btn cancel" onclick="closeCourierModal()" style="padding: 8px 16px; font-size: 0.9rem;">Cancel</button>
+            <button class="action-btn ship" id="confirmCourierBtn" onclick="confirmSendToCourier()" style="padding: 8px 16px; font-size: 0.9rem;">Confirm & Send</button>
+        </div>
+    </div>
+</div>
+
+<script>
+
+    function filterOrders(status) {
+        document.getElementById('statusFilter').value = status;
+        const filter = status;
+        let visibleCount = 0;
+
+        $('#ordersTableBody tr').each(function() {
+            const rowStatus = $(this).data('status');
+            if (filter === 'all' || rowStatus === filter) {
+                $(this).show();
+                visibleCount++;
+            } else {
+                $(this).hide();
+            }
+        });
+
+        $('#visibleCount').text(visibleCount);
+    }
+
+    // Modal ওপেন করার ফাংশন
+    function openCourierModal(saleId, name, phone, address, totalAmount) {
+        $('#modalSaleId').val(saleId);
+        $('#modalCustomerName').val(name);
+        $('#modalCustomerPhone').val(phone);
+        $('#modalCustomerAddress').val(address);
+        $('#modalCodAmount').val(totalAmount);
+        $('#courierModal').fadeIn(200);
+    }
+
+    // Modal বন্ধ করার ফাংশন
+    function closeCourierModal() {
+        $('#courierModal').fadeOut(200);
+    }
+    
+    // Modal থেকে ডাটা চেক করে ফাইনাল সেন্ড করার ফাংশন
+    function confirmSendToCourier() {
+        const saleId = $('#modalSaleId').val();
+        const phone = $('#modalCustomerPhone').val().trim();
+        const address = $('#modalCustomerAddress').val().trim();
+        const codAmount = $('#modalCodAmount').val();
+
+        if (!phone || !address) {
+            showNotification('❌ Phone and Address are required!', 'error');
+            return;
+        }
+
+        const $btn = $('#confirmCourierBtn');
+        const originalText = $btn.html();
+        $btn.html('<i class="fas fa-spinner fa-spin"></i> Sending...');
+        $btn.prop('disabled', true);
+
+        $.ajax({
+            url: '/api/order/send-courier',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({ 
+                saleId: saleId, 
+                codAmount: codAmount,
+                phone: phone,      // এডিট করা ফোন নাম্বার
+                address: address   // এডিট করা ঠিকানা
+            }),
+            success: function(response) {
+                if (response.success) {
+                    showNotification('✅ ' + response.message + (response.trackingCode ? ' — Tracking: ' + response.trackingCode : ''), 'success');
+                    closeCourierModal();
+                    setTimeout(function() {
+                        location.reload();
+                    }, 800);
+                } else {
+                    showNotification('❌ ' + response.message, 'error');
+                    $btn.html(originalText);
+                    $btn.prop('disabled', false);
+                }
+            },
+            error: function(xhr) {
+                const msg = xhr.responseJSON?.message || 'Failed to send order to courier';
+                showNotification('❌ ' + msg, 'error');
+                $btn.html(originalText);
+                $btn.prop('disabled', false);
+            }
+        });
+    }
+
+    function updateOrderStatus(saleId, status) {
+        const statusLabels = {
+            'pending': 'Pending',
+            'processing': 'Processing',
+            'shipped': 'Shipped',
+            'delivered': 'Delivered',
+            'cancelled': 'Cancelled'
+        };
+        
+        if (!confirm(`Are you sure you want to mark this order as "${statusLabels[status]}"?`)) {
+            return;
+        }
+
+        const $btn = $(`button[onclick*="${saleId}"][onclick*="${status}"]`);
+        const originalText = $btn.html();
+        $btn.html('<i class="fas fa-spinner fa-spin"></i>');
+        $btn.prop('disabled', true);
+
+        $.ajax({
+            url: '/api/order/status',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({ saleId: saleId, status: status }),
+            success: function(response) {
+                if (response.success) {
+                    showNotification('✅ ' + response.message, 'success');
+                    setTimeout(function() {
+                        location.reload();
+                    }, 500);
+                } else {
+                    showNotification('❌ ' + response.message, 'error');
+                }
+            },
+            error: function(xhr) {
+                const msg = xhr.responseJSON?.message || 'Failed to update status';
+                showNotification('❌ ' + msg, 'error');
+            },
+            complete: function() {
+                $btn.html(originalText);
+                $btn.prop('disabled', false);
+            }
+        });
+    }
+
+    function showNotification(message, type) {
+        if (typeof window.showNotification === 'function') {
+            window.showNotification(message, type);
+        } else {
+            alert(message);
+        }
+    }
+
+ 
+    $(document).ready(function() {
+        filterOrders('all');
+        console.log('✅ Admin Orders Dashboard Loaded');
+    });
+</script>
+
+<%- include('partials/footer') %>

@@ -1,0 +1,1189 @@
+<%- include('partials/header') %>
+
+<style>
+
+    .admin-page {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+    .admin-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 3px solid #f39c12;
+        padding-bottom: 16px;
+        margin-bottom: 30px;
+        flex-wrap: wrap;
+        gap: 16px;
+    }
+
+    .admin-header h2 {
+        margin: 0;
+        color: #1a202c;
+        font-size: 1.6rem;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .admin-header h2 i {
+        color: #f39c12;
+    }
+
+    .admin-header .header-actions {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    .admin-header .header-actions .btn {
+        padding: 10px 20px;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        text-decoration: none;
+        border: none;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .admin-header .header-actions .btn-secondary {
+        background: #4a5568;
+        color: white;
+    }
+
+    .admin-header .header-actions .btn-secondary:hover {
+        background: #2d3748;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(74, 85, 104, 0.3);
+    }
+
+
+    .create-product-block {
+        background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+        padding: 24px 28px;
+        border-radius: 16px;
+        margin-bottom: 40px;
+        border: 1px solid #e2e8f0;
+    }
+
+    .create-product-block h3 {
+        margin-top: 0;
+        color: #2d3748;
+        border-bottom: 2px solid #e2e8f0;
+        padding-bottom: 12px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 1.2rem;
+    }
+
+    .create-product-block h3 i {
+        color: #2b6cb0;
+    }
+
+    .create-product-form {
+        display: flex;
+        gap: 14px;
+        flex-wrap: wrap;
+        align-items: flex-end;
+    }
+
+    .create-product-form .form-group {
+        flex: 1;
+        min-width: 180px;
+        margin-bottom: 0;
+    }
+
+    .create-product-form .form-group label {
+        display: block;
+        font-size: 0.8rem;
+        font-weight: 700;
+        color: #4a5568;
+        margin-bottom: 4px;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+    }
+
+    .create-product-form .form-group input {
+        width: 100%;
+        padding: 10px 14px;
+        border: 2px solid #e2e8f0;
+        border-radius: 8px;
+        font-size: 0.95rem;
+        outline: none;
+        transition: all 0.3s ease;
+        background: white;
+        box-sizing: border-box;
+    }
+
+    .create-product-form .form-group input:focus {
+        border-color: #3182ce;
+        box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.2);
+    }
+
+    .create-product-form .form-group input[type="file"] {
+        padding: 8px 12px;
+        font-size: 0.85rem;
+        border: 2px dashed #cbd5e0;
+        background: #f7fafc;
+        cursor: pointer;
+    }
+
+    .create-product-form .form-group input[type="file"]:hover {
+        border-color: #f39c12;
+        background: #fef9e7;
+    }
+
+    .create-product-form .btn-submit {
+        padding: 10px 28px;
+        background: linear-gradient(45deg, #27ae60, #2ecc71);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-weight: 700;
+        font-size: 0.95rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        min-height: 46px;
+        white-space: nowrap;
+    }
+
+    .create-product-form .btn-submit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(46, 204, 113, 0.4);
+    }
+
+    /* Image Preview Styles */
+    .image-preview-container {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-top: 8px;
+    }
+
+    .image-preview-container .preview-thumb {
+        width: 60px;
+        height: 60px;
+        border-radius: 6px;
+        object-fit: cover;
+        border: 2px solid #e2e8f0;
+        transition: all 0.3s ease;
+    }
+
+    .image-preview-container .preview-thumb:hover {
+        border-color: #f39c12;
+        transform: scale(1.05);
+    }
+
+    .image-preview-container .preview-count {
+        font-size: 0.8rem;
+        color: #2b6cb0;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        background: #ebf8ff;
+        padding: 4px 12px;
+        border-radius: 12px;
+    }
+
+    .preview-thumb-wrapper {
+        position: relative;
+        display: inline-block;
+    }
+
+    .preview-thumb-wrapper .preview-remove {
+        position: absolute;
+        top: -6px;
+        right: -6px;
+        width: 18px;
+        height: 18px;
+        line-height: 18px;
+        text-align: center;
+        background: #e53e3e;
+        color: #fff;
+        border-radius: 50%;
+        font-size: 12px;
+        font-weight: 700;
+        cursor: pointer;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+    }
+
+    .preview-thumb-wrapper .preview-remove:hover {
+        background: #c53030;
+    }
+
+    .variant-grid-wrap {
+        min-width: 100%;
+    }
+
+    .variant-grid-container {
+        margin-top: 6px;
+        max-width: 100%;
+        overflow-x: auto;
+    }
+
+    .variant-stock-table {
+        border-collapse: collapse;
+        width: 100%;
+        font-size: 0.8rem;
+    }
+
+    .variant-stock-table th {
+        text-align: left;
+        background: #f7fafc;
+        color: #4a5568;
+        padding: 6px 10px;
+        border: 1px solid #e2e8f0;
+        font-weight: 600;
+    }
+
+    .variant-stock-table td {
+        padding: 4px 10px;
+        border: 1px solid #e2e8f0;
+        color: #2d3748;
+    }
+
+    .variant-stock-table input.variant-stock-input {
+        width: 70px;
+        padding: 4px 6px;
+        border: 1px solid #cbd5e0;
+        border-radius: 6px;
+        font-size: 0.8rem;
+    }
+
+    .variant-stock-table input.variant-price-input {
+        width: 90px;
+        padding: 4px 6px;
+        border: 1px solid #cbd5e0;
+        border-radius: 6px;
+        font-size: 0.8rem;
+    }
+
+    .file-label-with-count {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .file-label-with-count .file-count {
+        background: #f39c12;
+        color: white;
+        padding: 0px 10px;
+        border-radius: 12px;
+        font-size: 0.7rem;
+        font-weight: 700;
+    }
+
+   
+    .inventory-section-title {
+        color: #2d3748;
+        margin-bottom: 20px;
+        font-size: 1.2rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .inventory-section-title i {
+        color: #f39c12;
+    }
+
+    .inventory-section-title .count-badge {
+        background: #edf2f7;
+        color: #4a5568;
+        padding: 2px 12px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+
+    .admin-inventory-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 24px;
+    }
+
+    .admin-product-card {
+        background: white;
+        border-radius: 16px;
+        overflow: hidden;
+        border: 1px solid #e2e8f0;
+        transition: all 0.3s ease;
+        position: relative;
+    }
+
+    .admin-product-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
+        border-color: #f39c12;
+    }
+
+    .admin-product-card .product-image {
+        width: 100%;
+        height: 180px;
+        object-fit: cover;
+        background: #f7fafc;
+        transition: transform 0.3s ease;
+    }
+
+    .admin-product-card:hover .product-image {
+        transform: scale(1.02);
+    }
+
+    .admin-product-card .card-body {
+        padding: 16px 18px 18px;
+    }
+
+    .admin-product-card .card-body .product-name {
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: #2d3748;
+        display: block;
+        margin-bottom: 4px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .admin-product-card .card-body .product-price {
+        font-size: 1.15rem;
+        font-weight: 700;
+        color: #2b6cb0;
+        margin-bottom: 12px;
+    }
+
+    /* 🔥 স্টক স্টাইল */
+    .product-stock {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.85rem;
+        color: #4a5568;
+        margin-bottom: 8px;
+        padding: 6px 10px;
+        background: #f7fafc;
+        border-radius: 6px;
+    }
+
+    .product-stock i {
+        color: #718096;
+    }
+
+    .product-stock .stock-count {
+        font-weight: 700;
+        color: #2b6cb0;
+    }
+
+    .stock-badge {
+        padding: 2px 10px;
+        border-radius: 12px;
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        margin-left: auto;
+    }
+
+    .stock-badge.in-stock {
+        background: #c6f6d5;
+        color: #276749;
+    }
+
+    .stock-badge.low-stock {
+        background: #fefcbf;
+        color: #975a16;
+    }
+
+    .stock-badge.out-of-stock {
+        background: #fed7d7;
+        color: #9b2c2c;
+    }
+
+    .admin-product-card .delete-btn {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: rgba(229, 62, 62, 0.9);
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 30px;
+        height: 30px;
+        cursor: pointer;
+        font-size: 0.9rem;
+        font-weight: bold;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+        z-index: 5;
+        box-shadow: 0 2px 8px rgba(229, 62, 62, 0.3);
+    }
+
+    .admin-product-card .delete-btn:hover {
+        background: #c0392b;
+        transform: scale(1.1);
+    }
+
+  
+    .admin-product-card details {
+        text-align: left;
+        font-size: 0.85rem;
+        border-top: 1px dashed #e2e8f0;
+        padding-top: 12px;
+        margin-top: 8px;
+    }
+
+    .admin-product-card details summary {
+        cursor: pointer;
+        color: #4a5568;
+        text-align: center;
+        font-weight: 600;
+        outline: none;
+        padding: 4px 0;
+        border-radius: 4px;
+        transition: background 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+
+    .admin-product-card details summary:hover {
+        background: #f7fafc;
+        color: #2b6cb0;
+    }
+
+    .admin-product-card details summary i {
+        font-size: 0.9rem;
+    }
+
+    .admin-product-card details .edit-form {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin-top: 12px;
+    }
+
+    .admin-product-card details .edit-form .form-group {
+        margin-bottom: 0;
+    }
+
+    .admin-product-card details .edit-form .form-group label {
+        display: block;
+        font-size: 0.7rem;
+        font-weight: 700;
+        color: #718096;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+        margin-bottom: 3px;
+    }
+
+    .admin-product-card details .edit-form .form-group input {
+        width: 100%;
+        padding: 8px 12px;
+        border: 2px solid #e2e8f0;
+        border-radius: 6px;
+        font-size: 0.85rem;
+        outline: none;
+        transition: all 0.3s ease;
+        box-sizing: border-box;
+        background: white;
+    }
+
+    .admin-product-card details .edit-form .form-group input:focus {
+        border-color: #3182ce;
+        box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.2);
+    }
+
+    .admin-product-card details .edit-form .form-group input[type="file"] {
+        padding: 6px 10px;
+        font-size: 0.75rem;
+        border: 2px dashed #cbd5e0;
+        background: #f7fafc;
+        cursor: pointer;
+    }
+
+    .admin-product-card details .edit-form .form-group input[type="file"]:hover {
+        border-color: #f39c12;
+    }
+
+    .admin-product-card details .edit-form .btn-update {
+        padding: 8px 16px;
+        background: #4a5568;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        font-weight: 600;
+        font-size: 0.8rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+    }
+
+    .admin-product-card details .edit-form .btn-update:hover {
+        background: #2d3748;
+        transform: translateY(-1px);
+    }
+
+   
+    .empty-state {
+        grid-column: 1 / -1;
+        text-align: center;
+        padding: 60px 20px;
+        color: #a0aec0;
+    }
+
+    .empty-state i {
+        font-size: 4rem;
+        display: block;
+        margin-bottom: 16px;
+        color: #e2e8f0;
+    }
+
+    .empty-state h3 {
+        color: #4a5568;
+        margin-bottom: 8px;
+    }
+
+    /* 🔥 Image Count Badge */
+    .image-count-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        background: #ebf8ff;
+        color: #2b6cb0;
+        padding: 2px 10px;
+        border-radius: 12px;
+        font-size: 0.7rem;
+        font-weight: 600;
+        margin-top: 4px;
+    }
+
+    .variant-tags {
+        display: flex;
+        gap: 4px;
+        flex-wrap: wrap;
+        margin-top: 4px;
+    }
+
+    .variant-tag {
+        background: #edf2f7;
+        padding: 1px 8px;
+        border-radius: 10px;
+        font-size: 0.6rem;
+        color: #4a5568;
+        font-weight: 600;
+    }
+
+    @media (min-width: 1200px) {
+        .admin-inventory-grid {
+            grid-template-columns: repeat(4, 1fr);
+        }
+    }
+
+    @media (max-width: 1024px) {
+        .admin-inventory-grid {
+            grid-template-columns: repeat(3, 1fr);
+        }
+    }
+
+    @media (max-width: 768px) {
+        .admin-header {
+            flex-direction: column;
+            align-items: stretch;
+            text-align: center;
+        }
+
+        .admin-header .header-actions {
+            justify-content: center;
+        }
+
+        .create-product-form {
+            flex-direction: column;
+        }
+
+        .create-product-form .form-group {
+            min-width: unset;
+            width: 100%;
+        }
+
+        .create-product-form .btn-submit {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .admin-inventory-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+        }
+
+        .admin-page {
+            padding: 12px;
+        }
+
+        .create-product-block {
+            padding: 18px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .admin-inventory-grid {
+            grid-template-columns: 1fr;
+            gap: 16px;
+        }
+
+        .admin-header h2 {
+            font-size: 1.2rem;
+        }
+
+        .admin-header .header-actions .btn {
+            font-size: 0.8rem;
+            padding: 8px 14px;
+        }
+
+        .admin-product-card .product-image {
+            height: 140px;
+        }
+
+        .image-preview-container .preview-thumb {
+            width: 45px;
+            height: 45px;
+        }
+    }
+</style>
+
+
+<div class="admin-page">
+  
+    <div class="admin-header">
+        <h2>
+            <i class="fas fa-warehouse"></i> Inventory Management
+        </h2>
+        <div class="header-actions">
+            <a href="/terminal" class="btn btn-secondary">
+                <i class="fas fa-cash-register"></i> View Sales Terminal
+            </a>
+        </div>
+    </div>
+
+  
+    <div class="create-product-block">
+        <h3>
+            <i class="fas fa-plus-circle"></i> Create New Product
+        </h3>
+        <form action="/product/create" method="POST" enctype="multipart/form-data" class="create-product-form" id="createProductForm">
+            <div class="form-group">
+                <label><i class="fas fa-tag"></i> Product Name</label>
+                <input type="text" name="newProductName" placeholder="Enter product name..." required>
+            </div>
+
+
+<div class="form-group">
+    <label><i class="fas fa-tags"></i> Select Category</label>
+    <select name="category" id="createCategorySelect" style="width: 100%; padding: 10px; border: 2px solid #e2e8f0; border-radius: 8px;">
+        <option value="">-- Select Category --</option>
+        <% if (typeof categories !== 'undefined' && categories.length > 0) { %>
+            <% categories.forEach(cat => { %>
+                <option value="<%= cat._id %>"><%= cat.name %></option>
+            <% }) %>
+        <% } %>
+    </select>
+</div>
+
+
+
+            <div class="form-group">
+                <label><i class="fas fa-money-bill-wave"></i> Price (BDT)</label>
+                <input type="number" name="newProductPrice" step="0.01" placeholder="0.00" required>
+            </div>
+            <div class="form-group">
+                <label><i class="fas fa-tag"></i> Original Price (Discount)</label>
+                <input type="number" name="originalPrice" step="0.01" placeholder="e.g. 1650.00">
+            </div>
+            <div class="form-group">
+                <label><i class="fas fa-box"></i> Total Stock <small style="font-weight:400;color:#718096;">(auto-summed if you set per-variant stock below)</small></label>
+                <input type="number" name="newProductStock" id="create_stockInput" value="10" min="0" required>
+            </div>
+            
+            <!-- ✅ Multiple Images Upload with Preview -->
+            <div class="form-group" style="min-width: 220px;">
+                <label class="file-label-with-count">
+                    <i class="fas fa-images"></i> Product Images (Max 5)
+                    <span class="file-count" id="createFileCount">0</span>
+                </label>
+                <input type="file" name="productImages" accept="image/*" multiple required 
+                       id="createProductImages" style="padding: 8px;">
+                <small style="color:#718096;font-size:0.65rem;display:block;margin-top:3px;">
+                    <i class="fas fa-info-circle"></i> Select up to 5 images (Ctrl+Click). First is main.
+                </small>
+                <div class="image-preview-container" id="createImagePreview"></div>
+            </div>
+            
+            <div class="form-group">
+                <label><i class="fas fa-palette"></i> Colors (comma separated)</label>
+                <input type="text" name="colors" id="create_colorsInput" class="variant-colors-input" data-scope="create" placeholder="e.g. Black, Dark Chocolate, White">
+            </div>
+            <div class="form-group">
+                <label><i class="fas fa-ruler"></i> Sizes (comma separated)</label>
+                <input type="text" name="sizes" id="create_sizesInput" class="variant-sizes-input" data-scope="create" placeholder="e.g. 40, 41, 42, 43">
+            </div>
+
+            <!-- ✅ Per size+color stock grid, auto-built from Colors/Sizes above -->
+            <div class="form-group variant-grid-wrap">
+                <label><i class="fas fa-boxes-stacked"></i> Stock Per Variant</label>
+                <div class="variant-grid-container" id="create_variantGrid" data-scope="create" data-initial-variants='[]' style="display:none;"></div>
+                <small style="color:#718096;font-size:0.65rem;display:block;margin-top:3px;">
+                    <i class="fas fa-info-circle"></i> Fill Colors and/or Sizes above to enter stock (and optionally a different price) for each combination.
+                </small>
+            </div>
+            <input type="hidden" name="variantsData" id="create_variantsData" value="[]">
+
+            <button type="submit" class="btn-submit">
+                <i class="fas fa-save"></i> Save Product
+            </button>
+        </form>
+    </div>
+
+
+    <div class="inventory-section-title">
+        <i class="fas fa-boxes"></i> Active Inventory
+        <span class="count-badge"><%= products.length %> items</span>
+    </div>
+
+    <div class="admin-inventory-grid">
+        <% if (products && products.length > 0) { %>
+            <% products.forEach(product => { %>
+                <div class="admin-product-card">
+                  
+                    <form action="/product/delete" method="POST" onsubmit="return confirm('⚠️ Are you sure you want to delete this product permanently?');">
+                        <input type="hidden" name="productId" value="<%= product.id %>">
+                        <button type="submit" class="delete-btn" title="Delete Product">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </form>
+
+                   
+                    <img class="product-image" src="<%= product.imagePath %>" alt="<%= product.name %>" loading="lazy" />
+
+                 
+                    <div class="card-body">
+                        <span class="product-name" title="<%= product.name %>"><%= product.name %></span>
+                        <div class="product-price">BDT. <%= product.price.toFixed(2) %></div>
+
+                        <% if (product.originalPrice && product.originalPrice > product.price) { %>
+                            <div style="font-size:0.75rem;color:#a0aec0;text-decoration:line-through;margin-bottom:4px;">
+                                Was: BDT. <%= product.originalPrice.toFixed(2) %>
+                            </div>
+                        <% } %>
+
+                       
+                        <div class="product-stock">
+                            <i class="fas fa-box"></i>
+                            <span>Stock: <span class="stock-count"><%= product.stock || 0 %></span></span>
+                            <% if (product.stock <= 0) { %>
+                                <span class="stock-badge out-of-stock">Sold Out</span>
+                            <% } else if (product.stock <= 5) { %>
+                                <span class="stock-badge low-stock">Low Stock</span>
+                            <% } else { %>
+                                <span class="stock-badge in-stock">In Stock</span>
+                            <% } %>
+                        </div>
+
+                       
+                        <% if (product.images && product.images.length > 1) { %>
+                            <div class="image-count-badge">
+                                <i class="fas fa-images"></i> <%= product.images.length %> images
+                            </div>
+                        <% } %>
+
+                        <% if ((product.colors && product.colors.length > 0) || (product.sizes && product.sizes.length > 0)) { %>
+                            <div class="variant-tags">
+                                <% if (product.colors && product.colors.length > 0) { %>
+                                    <span class="variant-tag"><%= product.colors.join(', ') %></span>
+                                <% } %>
+                                <% if (product.sizes && product.sizes.length > 0) { %>
+                                    <span class="variant-tag">Sizes: <%= product.sizes.join(', ') %></span>
+                                <% } %>
+                            </div>
+                        <% } %>
+
+                        
+                        <details>
+                            <summary>
+                                <i class="fas fa-edit"></i> Edit Product
+                            </summary>
+                            <form action="/product/update" method="POST" enctype="multipart/form-data" class="edit-form" id="updateForm_<%= product.id %>">
+                                <input type="hidden" name="productId" value="<%= product.id %>">
+
+                                <div class="form-group">
+                                    <label><i class="fas fa-tag"></i> Product Name</label>
+                                    <input type="text" name="updateProductName" value="<%= product.name %>" required>
+                                </div>
+
+                                
+
+<div class="form-group">
+    <label><i class="fas fa-tags"></i> Category</label>
+    <select name="updateCategory" style="width: 100%; padding: 8px; border: 2px solid #e2e8f0; border-radius: 6px;">
+        <% if (typeof categories !== 'undefined' && categories.length > 0) { %>
+            <% categories.forEach(cat => { %>
+                <option value="<%= cat._id %>" <%= (product.category && product.category.toString() === cat._id.toString()) ? 'selected' : '' %>>
+                    <%= cat.name %>
+                </option>
+            <% }) %>
+        <% } %>
+    </select>
+</div>
+
+                                <div class="form-group">
+                                    <label><i class="fas fa-money-bill-wave"></i> Price (BDT)</label>
+                                    <input type="number" name="updateProductPrice" step="0.01" value="<%= product.price %>" required>
+                                </div>
+
+                                <div class="form-group">
+                                    <label><i class="fas fa-tag"></i> Original Price</label>
+                                    <input type="number" name="updateOriginalPrice" step="0.01" value="<%= product.originalPrice || '' %>">
+                                </div>
+
+                                <div class="form-group">
+                                    <label><i class="fas fa-box"></i> Total Stock <small style="font-weight:400;color:#718096;">(auto-summed if variants below are set)</small></label>
+                                    <input type="number" name="updateProductStock" id="update_<%= product.id %>_stockInput" min="0" value="<%= product.stock || 0 %>" required>
+                                </div>
+
+                                <!-- ✅ Update - Multiple Images with Preview -->
+                                <div class="form-group">
+                                    <label class="file-label-with-count">
+                                        <i class="fas fa-images"></i> Replace Images (Max 5)
+                                        <span class="file-count" id="updateFileCount_<%= product.id %>">0</span>
+                                    </label>
+                                    <input type="file" name="productImages" accept="image/*" multiple 
+                                           id="updateProductImages_<%= product.id %>" style="padding: 6px 10px;">
+                                    <small style="color:#718096;font-size:0.6rem;display:block;margin-top:2px;">
+                                        <i class="fas fa-info-circle"></i> Upload new images to replace all current images.
+                                    </small>
+                                    <div class="image-preview-container" id="updateImagePreview_<%= product.id %>"></div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label><i class="fas fa-palette"></i> Colors</label>
+                                    <input type="text" name="updateColors" id="update_<%= product.id %>_colorsInput" class="variant-colors-input" data-scope="update_<%= product.id %>" value="<%= product.colors ? product.colors.join(', ') : '' %>">
+                                </div>
+
+                                <div class="form-group">
+                                    <label><i class="fas fa-ruler"></i> Sizes</label>
+                                    <input type="text" name="updateSizes" id="update_<%= product.id %>_sizesInput" class="variant-sizes-input" data-scope="update_<%= product.id %>" value="<%= product.sizes ? product.sizes.join(', ') : '' %>">
+                                </div>
+
+                                <!-- ✅ Per size+color stock grid, pre-filled from saved variants -->
+                                <div class="form-group variant-grid-wrap">
+                                    <label><i class="fas fa-boxes-stacked"></i> Stock Per Variant</label>
+                                    <div class="variant-grid-container" id="update_<%= product.id %>_variantGrid" data-scope="update_<%= product.id %>"
+                                         data-initial-variants='<%- JSON.stringify(product.variants || []).replace(/'/g, "&#39;") %>' style="display:none;"></div>
+                                </div>
+                                <input type="hidden" name="variantsData" id="update_<%= product.id %>_variantsData" value="[]">
+
+                                <button type="submit" class="btn-update">
+                                    <i class="fas fa-sync-alt"></i> Update Record
+                                </button>
+                            </form>
+                        </details>
+                    </div>
+                </div>
+            <% }) %>
+        <% } else { %>
+            <div class="empty-state">
+                <i class="fas fa-box-open"></i>
+                <h3>No Products Found</h3>
+                <p>Start by adding your first product using the form above.</p>
+            </div>
+        <% } %>
+    </div>
+</div>
+
+
+<script>
+$(document).ready(function() {
+
+    // ============================================
+    // PER SIZE+COLOR STOCK + PRICE GRID (CREATE + UPDATE FORMS)
+    // ============================================
+    // Builds a small table with a Stock input and a Price input per Color x
+    // Size combination, whenever the admin fills in Colors and/or Sizes.
+    // Keeps previously typed numbers when the grid is regenerated (e.g.
+    // admin adds one more size), and writes the result into a hidden JSON
+    // field (variantsData) plus auto-sums the total into "Total Stock".
+    // Price column: leave blank/0 to just use the product's base price for
+    // that combination; only set it if that specific color/size should cost
+    // something different.
+
+    window.variantStockState = window.variantStockState || {};
+
+    function recomputeVariantTotals(scope) {
+        const $container = $('#' + scope + '_variantGrid');
+        const $stockInput = $('#' + scope + '_stockInput');
+        const $hidden = $('#' + scope + '_variantsData');
+
+        let total = 0;
+        const variants = [];
+        $container.find('.variant-row').each(function () {
+            const $row = $(this);
+            const s = parseInt($row.find('.variant-stock-input').val()) || 0;
+            const p = parseFloat($row.find('.variant-price-input').val()) || 0;
+            total += s;
+            variants.push({
+                color: $row.attr('data-color') || '',
+                size: $row.attr('data-size') || '',
+                stock: s,
+                price: p
+            });
+        });
+        $stockInput.val(total);
+        $hidden.val(JSON.stringify(variants));
+    }
+
+    function rebuildVariantGrid(scope) {
+        const $colors = $('#' + scope + '_colorsInput');
+        const $sizes = $('#' + scope + '_sizesInput');
+        const $container = $('#' + scope + '_variantGrid');
+        const $stockInput = $('#' + scope + '_stockInput');
+        const $hidden = $('#' + scope + '_variantsData');
+
+        const colorArr = ($colors.val() || '').split(',').map(function (s) { return s.trim(); }).filter(Boolean);
+        const sizeArr = ($sizes.val() || '').split(',').map(function (s) { return s.trim(); }).filter(Boolean);
+
+        // Remember what's already on screen before we throw the grid away and rebuild it
+        if (!window.variantStockState[scope]) window.variantStockState[scope] = {};
+        const state = window.variantStockState[scope];
+        $container.find('.variant-row').each(function () {
+            const $row = $(this);
+            const key = ($row.attr('data-color') || '') + '||' + ($row.attr('data-size') || '');
+            state[key] = {
+                stock: parseInt($row.find('.variant-stock-input').val()) || 0,
+                price: parseFloat($row.find('.variant-price-input').val()) || 0
+            };
+        });
+
+        if (colorArr.length === 0 && sizeArr.length === 0) {
+            // No colors/sizes at all -> plain single-stock/single-price product, no grid needed
+            $container.empty().hide();
+            $stockInput.prop('readonly', false);
+            $hidden.val('[]');
+            return;
+        }
+
+        const colorsForGrid = colorArr.length ? colorArr : [''];
+        const sizesForGrid = sizeArr.length ? sizeArr : [''];
+
+        let html = '<table class="variant-stock-table"><thead><tr>';
+        if (colorArr.length) html += '<th>Color</th>';
+        if (sizeArr.length) html += '<th>Size</th>';
+        html += '<th>Stock</th><th>Price (optional)</th></tr></thead><tbody>';
+
+        colorsForGrid.forEach(function (color) {
+            sizesForGrid.forEach(function (size) {
+                const key = color + '||' + size;
+                const existing = state.hasOwnProperty(key) ? state[key] : { stock: 0, price: 0 };
+                const safeColor = String(color).replace(/"/g, '&quot;');
+                const safeSize = String(size).replace(/"/g, '&quot;');
+                html += '<tr class="variant-row" data-color="' + safeColor + '" data-size="' + safeSize + '">';
+                if (colorArr.length) html += '<td>' + color + '</td>';
+                if (sizeArr.length) html += '<td>' + size + '</td>';
+                html += '<td><input type="number" min="0" class="variant-stock-input" value="' + existing.stock + '"></td>';
+                html += '<td><input type="number" min="0" step="0.01" class="variant-price-input" placeholder="base price" value="' +
+                        (existing.price > 0 ? existing.price : '') + '"></td>';
+                html += '</tr>';
+            });
+        });
+        html += '</tbody></table>';
+
+        $container.show().html(html);
+        $stockInput.prop('readonly', true);
+        recomputeVariantTotals(scope);
+    }
+
+    // Rebuild the grid whenever Colors/Sizes text changes
+    $(document).on('input', '.variant-colors-input, .variant-sizes-input', function () {
+        rebuildVariantGrid($(this).data('scope'));
+    });
+
+    // Re-sum totals whenever a stock or price cell in any grid changes
+    $(document).on('input change', '.variant-stock-input, .variant-price-input', function () {
+        const scope = $(this).closest('.variant-grid-container').data('scope');
+        recomputeVariantTotals(scope);
+    });
+
+    // Seed each grid (create form starts empty; each product's edit form
+    // starts pre-filled with its saved variants) then render it once on load
+    $('.variant-grid-container').each(function () {
+        const scope = $(this).data('scope');
+        let initial = [];
+        try {
+            initial = JSON.parse(this.getAttribute('data-initial-variants') || '[]');
+        } catch (e) {
+            initial = [];
+        }
+        window.variantStockState[scope] = {};
+        initial.forEach(function (v) {
+            const key = (v.color || '') + '||' + (v.size || '');
+            window.variantStockState[scope][key] = { stock: v.stock || 0, price: v.price || 0 };
+        });
+        rebuildVariantGrid(scope);
+    });
+
+    // ============================================
+    // MULTI-IMAGE PICKING (CREATE + UPDATE FORMS)
+    // ============================================
+    // A plain <input type="file" multiple> REPLACES its whole FileList every
+    // time the OS file dialog is used. So picking one image, then opening the
+    // dialog again for a second image, wiped out the first one.
+    // Fix: keep our own running list of File objects per input (in .data()),
+    // merge newly picked files into it, cap at 5, drop exact duplicates,
+    // then rebuild the input's FileList via DataTransfer so the form submits
+    // ALL accumulated images, not just the last picked batch.
+
+    function filesToDataTransfer(files) {
+        const dt = new DataTransfer();
+        files.forEach(function (f) { dt.items.add(f); });
+        return dt.files;
+    }
+
+    function renderImagePreview($input, files, $preview, $count) {
+        $preview.empty();
+        $count.text(files.length);
+
+        if (files.length > 0) {
+            $preview.append(
+                '<span class="preview-count"><i class="fas fa-check-circle"></i> ' +
+                files.length + ' image(s) selected</span>'
+            );
+        }
+
+        files.forEach(function (file, idx) {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                const $wrap = $('<span class="preview-thumb-wrapper"></span>');
+                $wrap.append(
+                    '<img src="' + e.target.result + '" class="preview-thumb" title="' +
+                    (idx === 0 ? 'Main Image' : 'Image ' + (idx + 1)) + '">'
+                );
+                const $remove = $('<span class="preview-remove" title="Remove">&times;</span>');
+                $remove.on('click', function () {
+                    files.splice(idx, 1);
+                    $input.data('selectedFiles', files);
+                    $input[0].files = filesToDataTransfer(files);
+                    renderImagePreview($input, files, $preview, $count);
+                });
+                $wrap.append($remove);
+                $preview.append($wrap);
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+
+    $(document).on('change', 'input[name="productImages"]', function () {
+        const $input = $(this);
+        const isCreate = $input.attr('id') === 'createProductImages';
+
+        let $preview, $count;
+        if (isCreate) {
+            $preview = $('#createImagePreview');
+            $count = $('#createFileCount');
+        } else {
+            const $form = $input.closest('form');
+            const productId = $form.find('input[name="productId"]').val();
+            $preview = $('#updateImagePreview_' + productId);
+            $count = $('#updateFileCount_' + productId);
+        }
+
+        let files = $input.data('selectedFiles') || [];
+        const newlyPicked = Array.from(this.files);
+
+        newlyPicked.forEach(function (f) {
+            const isDuplicate = files.some(function (existing) {
+                return existing.name === f.name && existing.size === f.size &&
+                       existing.lastModified === f.lastModified;
+            });
+            if (!isDuplicate && files.length < 5) {
+                files.push(f);
+            }
+        });
+
+        if (files.length > 5) {
+            files = files.slice(0, 5);
+            if (typeof showNotification === 'function') {
+                showNotification('⚠️ Maximum 5 images allowed, extra ones ignored.', 'warning');
+            }
+        }
+
+        $input.data('selectedFiles', files);
+        this.files = filesToDataTransfer(files); // so the form actually submits all of them
+        renderImagePreview($input, files, $preview, $count);
+    });
+
+    // ============================================
+    // DELETE CONFIRMATION
+    // ============================================
+    $('.admin-product-card form[action="/product/delete"]').on('submit', function(e) {
+        var productName = $(this).closest('.admin-product-card').find('.product-name').text().trim();
+        if (!confirm('⚠️ Are you sure you want to delete "' + productName + '" permanently?\n\nThis action cannot be undone!')) {
+            e.preventDefault();
+            return false;
+        }
+    });
+
+    // ============================================
+    // FILE INPUT LABEL UPDATE
+    // ============================================
+    $('input[type="file"]').on('change', function() {
+        var fileName = $(this).val().split('\\').pop();
+        var fileCount = this.files ? this.files.length : 0;
+        var $label = $(this).closest('.form-group').find('label');
+        
+        if (fileCount > 1) {
+            $label.html('<i class="fas fa-images"></i> ' + fileCount + ' images selected');
+        } else if (fileName) {
+            $label.html('<i class="fas fa-image"></i> ' + fileName);
+        }
+    });
+
+    // ============================================
+    // NOTIFICATIONS
+    // ============================================
+    var success = '<%= typeof success !== "undefined" ? success : false %>';
+    var error = '<%= typeof error !== "undefined" ? error : "" %>';
+
+    if (success === 'true') {
+        if (typeof showNotification === 'function') {
+            showNotification('✅ Product saved successfully!', 'success');
+        } else {
+            console.log('✅ Product saved successfully!');
+        }
+    }
+
+    if (error && error !== '') {
+        if (typeof showNotification === 'function') {
+            showNotification('❌ ' + error, 'error');
+        } else {
+            console.log('❌ ' + error);
+        }
+    }
+
+    console.log('📦 Admin Inventory Page Loaded');
+});
+</script>
+
+<%- include('partials/footer') %>

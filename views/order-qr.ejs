@@ -1,0 +1,200 @@
+<%- include('partials/header') %>
+
+<style>
+    .qr-page {
+        max-width: 600px;
+        margin: 40px auto;
+        padding: 20px;
+    }
+
+    .qr-card {
+        background: white;
+        border-radius: 16px;
+        padding: 32px;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.08);
+        text-align: center;
+    }
+
+    .qr-card h2 {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        color: #1a202c;
+        margin-bottom: 8px;
+    }
+
+    .qr-card .order-id {
+        font-family: monospace;
+        font-size: 0.9rem;
+        background: #f7fafc;
+        padding: 4px 12px;
+        border-radius: 6px;
+        color: #4a5568;
+        display: inline-block;
+        margin-bottom: 20px;
+    }
+
+    .qr-code-container {
+        background: white;
+        padding: 20px;
+        border-radius: 12px;
+        display: inline-block;
+        border: 2px solid #e2e8f0;
+        margin: 16px 0;
+    }
+
+    .qr-code-container img {
+        display: block;
+        width: 250px;
+        height: 250px;
+    }
+
+    .order-info {
+        text-align: left;
+        background: #f7fafc;
+        padding: 16px;
+        border-radius: 8px;
+        margin: 16px 0;
+    }
+
+    .order-info .row {
+        display: flex;
+        justify-content: space-between;
+        padding: 6px 0;
+        border-bottom: 1px solid #edf2f7;
+        font-size: 0.9rem;
+    }
+
+    .order-info .row:last-child {
+        border-bottom: none;
+    }
+
+    .order-info .row .label {
+        color: #718096;
+    }
+
+    .order-info .row .value {
+        font-weight: 600;
+        color: #1a202c;
+    }
+
+    .status-badge {
+        padding: 4px 14px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .status-badge.pending { background: #fefcbf; color: #975a16; }
+    .status-badge.processing { background: #bee3f8; color: #2a69ac; }
+    .status-badge.shipped { background: #c6f6d5; color: #276749; }
+    .status-badge.delivered { background: #9ae6b4; color: #22543d; }
+    .status-badge.cancelled { background: #fed7d7; color: #9b2c2c; }
+
+    .btn-download {
+        padding: 10px 24px;
+        background: #3182ce;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .btn-download:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(49, 130, 206, 0.3);
+    }
+
+    .btn-back {
+        display: inline-block;
+        margin-top: 16px;
+        color: #3182ce;
+        text-decoration: none;
+        font-weight: 600;
+    }
+
+    .btn-back:hover {
+        text-decoration: underline;
+    }
+
+    @media (max-width: 480px) {
+        .qr-card {
+            padding: 20px;
+        }
+
+        .qr-code-container img {
+            width: 180px;
+            height: 180px;
+        }
+    }
+</style>
+
+<div class="qr-page">
+    <div class="qr-card">
+        <h2>
+            <i class="fas fa-qrcode" style="color: #f39c12;"></i>
+            Order QR Code
+        </h2>
+        
+        <div class="order-id">#<%= order.saleId %></div>
+        
+  
+        <div class="qr-code-container">
+            <img src="<%= qrImage %>" alt="Order QR Code" />
+        </div>
+        
+
+        <div class="order-info">
+            <div class="row">
+                <span class="label">Customer</span>
+                <span class="value"><%= order.customerName %></span>
+            </div>
+            <div class="row">
+                <span class="label">Product</span>
+                <span class="value"><%= order.productName %></span>
+            </div>
+            <div class="row">
+                <span class="label">Total</span>
+                <span class="value">BDT. <%= order.totalAmount.toFixed(2) %></span>
+            </div>
+            <div class="row">
+                <span class="label">Status</span>
+                <span class="value">
+                    <span class="status-badge <%= (order.status || 'pending').toLowerCase() %>">
+                        <%= order.status || 'Pending' %>
+                    </span>
+                </span>
+            </div>
+        </div>
+        
+ 
+        <button class="btn-download" onclick="downloadQR()">
+            <i class="fas fa-download"></i> Download QR Code
+        </button>
+        
+        <br />
+        <a href="/my-orders" class="btn-back">
+            <i class="fas fa-arrow-left"></i> Back to Orders
+        </a>
+    </div>
+</div>
+
+<script>
+    function downloadQR() {
+        const img = document.querySelector('.qr-code-container img');
+        const link = document.createElement('a');
+        link.download = 'order-<%= order.saleId %>.png';
+        link.href = img.src;
+        link.click();
+    }
+</script>
+
+<%- include('partials/footer') %>

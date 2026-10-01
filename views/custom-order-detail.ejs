@@ -1,0 +1,176 @@
+<%- include('partials/header') %>
+
+<style>
+    .order-detail-page {
+        max-width: 900px;
+        margin: 40px auto;
+        padding: 20px;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+    }
+    .order-detail-page h2 {
+        border-bottom: 2px solid #f39c12;
+        padding-bottom: 12px;
+        margin-bottom: 24px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    .detail-row {
+        display: flex;
+        padding: 10px 0;
+        border-bottom: 1px solid #edf2f7;
+    }
+    .detail-row .label {
+        font-weight: 600;
+        width: 150px;
+        flex-shrink: 0;
+        color: #4a5568;
+    }
+    .detail-row .value {
+        color: #2d3748;
+    }
+    .status-badge {
+        padding: 4px 14px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+    }
+    .status-pending { background: #fefcbf; color: #975a16; }
+    .status-approved { background: #c6f6d5; color: #276749; }
+    .status-rejected { background: #fed7d7; color: #9b2c2c; }
+    .status-assigned { background: #bee3f8; color: #2a69ac; }
+    .status-completed { background: #e9d8fd; color: #6b46c1; }
+    .order-images {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-top: 8px;
+    }
+    .order-images img {
+        width: 100px;
+        height: 100px;
+        object-fit: cover;
+        border-radius: 8px;
+        border: 2px solid #e2e8f0;
+    }
+    .bid-list {
+        margin-top: 16px;
+        background: #f7fafc;
+        border-radius: 8px;
+        padding: 12px;
+    }
+    .bid-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 8px 0;
+        border-bottom: 1px solid #edf2f7;
+    }
+    .bid-item:last-child { border-bottom: none; }
+    .btn-back {
+        display: inline-block;
+        margin-top: 20px;
+        padding: 8px 20px;
+        background: #4a5568;
+        color: white;
+        border-radius: 6px;
+        text-decoration: none;
+        font-weight: 600;
+    }
+    .btn-back:hover { background: #2d3748; }
+</style>
+
+<div class="order-detail-page">
+    <h2><i class="fas fa-file-invoice"></i> Order Details</h2>
+
+    <div class="detail-row">
+        <span class="label">Order ID</span>
+        <span class="value"><%= order.id %></span>
+    </div>
+    <div class="detail-row">
+        <span class="label">Title</span>
+        <span class="value"><%= order.title %></span>
+    </div>
+    <div class="detail-row">
+        <span class="label">Description</span>
+        <span class="value"><%= order.description %></span>
+    </div>
+    <div class="detail-row">
+        <span class="label">Budget</span>
+        <span class="value"><%= order.budget ? 'BDT. ' + order.budget.toFixed(2) : 'N/A' %></span>
+    </div>
+    <div class="detail-row">
+        <span class="label">Quantity</span>
+        <span class="value"><%= order.quantity || 1 %></span>
+    </div>
+    <div class="detail-row">
+        <span class="label">Deadline</span>
+        <span class="value"><%= order.deadline ? new Date(order.deadline).toLocaleDateString() : 'No deadline' %></span>
+    </div>
+    <div class="detail-row">
+        <span class="label">Status</span>
+        <span class="value">
+            <span class="status-badge status-<%= order.status %>">
+                <%= order.status.charAt(0).toUpperCase() + order.status.slice(1) %>
+            </span>
+        </span>
+    </div>
+    <div class="detail-row">
+        <span class="label">Submitted on</span>
+        <span class="value"><%= new Date(order.createdAt).toLocaleString() %></span>
+    </div>
+
+    <% if (order.images && order.images.length > 0) { %>
+        <div class="detail-row" style="flex-wrap: wrap;">
+            <span class="label">Reference Images</span>
+            <div class="order-images">
+                <% order.images.forEach(img => { %>
+                    <img src="<%= img %>" alt="Reference" onclick="window.open(this.src,'_blank')">
+                <% }) %>
+            </div>
+        </div>
+    <% } %>
+
+    <% if (order.adminNotes) { %>
+        <div class="detail-row">
+            <span class="label">Admin Note</span>
+            <span class="value"><%= order.adminNotes %></span>
+        </div>
+    <% } %>
+
+    <!-- ✅ বিড লিস্ট (সবাই দেখতে পাবে) -->
+    <% if (order.bids && order.bids.length > 0) { %>
+        <div class="detail-row" style="flex-direction: column; align-items: stretch;">
+            <span class="label" style="margin-bottom: 8px;">Bids (<%= order.bids.length %>)</span>
+            <div class="bid-list">
+                <% order.bids.forEach(bid => { %>
+                    <div class="bid-item">
+                        <div>
+                            <strong><%= bid.sellerName %></strong>
+                            <span style="font-size:0.85rem; color:#718096; margin-left:8px;">
+                                BDT. <%= bid.amount.toFixed(2) %>
+                                <%= bid.deliveryTime ? `| Delivery: ${bid.deliveryTime}` : '' %>
+                            </span>
+                            <% if (bid.note) { %>
+                                <div style="font-size:0.8rem; color:#718096;"><%= bid.note %></div>
+                            <% } %>
+                        </div>
+                        <span class="status-badge bid-status-<%= bid.status %>" style="font-size:0.65rem;">
+                            <%= bid.status %>
+                        </span>
+                    </div>
+                <% }) %>
+            </div>
+        </div>
+    <% } %>
+
+    <a href="/my-custom-orders" class="btn-back"><i class="fas fa-arrow-left"></i> Back to My Orders</a>
+</div>
+
+<script>
+    console.log('✅ Custom Order Detail Page Loaded');
+</script>
+
+<%- include('partials/footer') %>

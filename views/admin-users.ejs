@@ -1,0 +1,347 @@
+<%- include('partials/header') %>
+
+<style>
+    .users-page {
+        max-width: 1000px;
+        margin: 40px auto;
+        padding: 20px;
+    }
+
+    .users-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 2px solid #f39c12;
+        padding-bottom: 16px;
+        margin-bottom: 24px;
+    }
+
+    .users-header h2 {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        color: #1a202c;
+    }
+
+    .users-header h2 i {
+        color: #f39c12;
+    }
+
+    .user-card {
+        background: white;
+        border-radius: 12px;
+        padding: 16px 20px;
+        margin-bottom: 12px;
+        border: 1px solid #e2e8f0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 12px;
+        transition: all 0.3s ease;
+    }
+
+    .user-card:hover {
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+    }
+
+    .user-info {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        flex-wrap: wrap;
+    }
+
+    .user-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #3182ce, #2b6cb0);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 1.1rem;
+    }
+
+    .user-details .username {
+        font-weight: 600;
+        color: #1a202c;
+    }
+
+    .user-details .user-email {
+        font-size: 0.85rem;
+        color: #718096;
+    }
+
+    .user-role-select {
+        padding: 6px 12px;
+        border: 2px solid #e2e8f0;
+        border-radius: 6px;
+        font-size: 0.85rem;
+        outline: none;
+        background: white;
+        cursor: pointer;
+    }
+
+    .user-role-select:focus {
+        border-color: #3182ce;
+    }
+
+    .user-role-select.role-user {
+        border-color: #a0aec0;
+    }
+
+    .user-role-select.role-cashier {
+        border-color: #f39c12;
+    }
+
+    .user-role-select.role-seller {
+        border-color: #38a169;
+    }
+
+    .user-role-select.role-admin {
+        border-color: #e53e3e;
+    }
+
+    .user-actions {
+        display: flex;
+        gap: 8px;
+    }
+
+    .btn-delete {
+        background: #fed7d7;
+        color: #c53030;
+        border: none;
+        padding: 6px 12px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 0.8rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .btn-delete:hover {
+        background: #feb2b2;
+    }
+
+    .role-badge {
+        display: inline-block;
+        padding: 2px 12px;
+        border-radius: 12px;
+        font-size: 0.7rem;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .role-badge.user {
+        background: #edf2f7;
+        color: #4a5568;
+    }
+
+    .role-badge.cashier {
+        background: #fefcbf;
+        color: #975a16;
+    }
+
+    .role-badge.seller {
+        background: #c6f6d5;
+        color: #276749;
+    }
+
+    .role-badge.admin {
+        background: #fed7d7;
+        color: #9b2c2c;
+    }
+
+    .protected-badge {
+        background: #fefcbf;
+        color: #975a16;
+        padding: 2px 10px;
+        border-radius: 12px;
+        font-size: 0.7rem;
+        font-weight: 700;
+        display: inline-block;
+        margin-left: 6px;
+    }
+
+    .super-admin-tag {
+        background: linear-gradient(45deg, #f39c12, #e67e22);
+        color: white;
+        padding: 2px 10px;
+        border-radius: 12px;
+        font-size: 0.65rem;
+        font-weight: 700;
+        display: inline-block;
+        margin-left: 6px;
+    }
+
+    .lock-icon {
+        color: #f39c12;
+        margin-right: 4px;
+    }
+
+    @media (max-width: 768px) {
+        .user-card {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .user-info {
+            flex-wrap: wrap;
+        }
+
+        .user-actions {
+            justify-content: flex-end;
+        }
+    }
+</style>
+
+<div class="users-page">
+    <div class="users-header">
+        <h2>
+            <i class="fas fa-users"></i> User Management
+        </h2>
+        <span style="color: #718096; font-size: 0.9rem;">
+            <i class="fas fa-user"></i> Total: <strong><%= users.length %></strong>
+        </span>
+    </div>
+
+    <div id="usersList">
+        <% users.forEach(u => { %>
+            <div class="user-card" data-user-id="<%= u.id %>">
+                <div class="user-info">
+                    <div class="user-avatar">
+                        <%= u.username.charAt(0).toUpperCase() %>
+                    </div>
+                    <div class="user-details">
+                        <div class="username">
+                            <%= u.username %>
+                            <span class="role-badge <%= u.role %>"><%= u.role %></span>
+                            <% if (u.username === 'superadmin') { %>
+                                <span class="super-admin-tag">
+                                    <i class="fas fa-crown"></i> SUPER
+                                </span>
+                            <% } %>
+                            <% if (u.profile?.isSuperAdmin === true && u.username !== 'superadmin') { %>
+                                <span class="super-admin-tag">
+                                    <i class="fas fa-crown"></i> SUPER
+                                </span>
+                            <% } %>
+                        </div>
+                        <div class="user-email">
+                            <%= u.profile?.email || 'No email' %>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+                    <% if (u.id !== user.id) { %>
+                        <% if (u.username === 'superadmin' || u.profile?.isSuperAdmin === true) { %>
+                            <span class="protected-badge">
+                                <i class="fas fa-lock lock-icon"></i> Protected
+                            </span>
+                            <span style="font-size: 0.8rem; color: #718096; font-weight: 500;">
+                                (Cannot be modified)
+                            </span>
+                        <% } else { %>
+                            <select class="user-role-select role-<%= u.role %>" data-user-id="<%= u.id %>" onchange="updateUserRole(this)">
+                                <option value="user" <%= u.role === 'user' ? 'selected' : '' %>>User</option>
+                                <option value="authorized_cashier" <%= u.role === 'authorized_cashier' ? 'selected' : '' %>>Cashier</option>
+                                <option value="seller" <%= u.role === 'seller' ? 'selected' : '' %>>Seller</option>
+                                <% if (user.username === 'superadmin' || user.isSuperAdmin === true) { %>
+                                    <option value="admin" <%= u.role === 'admin' ? 'selected' : '' %>>Admin</option>
+                                <% } %>
+                            </select>
+                            <button class="btn-delete" onclick="deleteUser('<%= u.id %>')">
+                                <i class="fas fa-trash"></i> Delete
+                            </button>
+                        <% } %>
+                    <% } else { %>
+                        <span style="font-size: 0.8rem; color: #718096; font-weight: 600;">
+                            <i class="fas fa-user-shield"></i> You
+                        </span>
+                        <% if (user.username === 'superadmin' || user.isSuperAdmin === true) { %>
+                            <span class="super-admin-tag">
+                                <i class="fas fa-crown"></i> SUPER
+                            </span>
+                        <% } %>
+                    <% } %>
+                </div>
+            </div>
+        <% }) %>
+    </div>
+</div>
+
+<script>
+    function updateUserRole(select) {
+        const userId = $(select).data('user-id');
+        const role = $(select).val();
+
+        if (!confirm(`⚠️ Are you sure you want to change this user's role to "${role}"?`)) {
+            $(select).val($(select).data('previous-value'));
+            return;
+        }
+
+        $.ajax({
+            url: '/api/user/role',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({ userId: userId, role: role }),
+            success: function(response) {
+                if (response.success) {
+                    showNotification('✅ ' + response.message, 'success');
+                    location.reload();
+                } else {
+                    showNotification('❌ ' + response.message, 'error');
+                }
+            },
+            error: function(xhr) {
+                const msg = xhr.responseJSON?.message || 'Failed to update role';
+                showNotification('❌ ' + msg, 'error');
+            }
+        });
+    }
+
+    $(document).on('focus', '.user-role-select', function() {
+        $(this).data('previous-value', $(this).val());
+    });
+
+    function deleteUser(userId) {
+        if (!confirm('⚠️ Are you sure you want to delete this user? This action cannot be undone!')) {
+            return;
+        }
+
+        $.ajax({
+            url: '/api/user/delete',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({ userId: userId }),
+            success: function(response) {
+                if (response.success) {
+                    showNotification('✅ ' + response.message, 'success');
+                    location.reload();
+                } else {
+                    showNotification('❌ ' + response.message, 'error');
+                }
+            },
+            error: function(xhr) {
+                const msg = xhr.responseJSON?.message || 'Failed to delete user';
+                showNotification('❌ ' + msg, 'error');
+            }
+        });
+    }
+
+    function showNotification(message, type) {
+        if (typeof window.showNotification === 'function') {
+            window.showNotification(message, type);
+        } else {
+            alert(message);
+        }
+    }
+
+    console.log('✅ User Management Page Loaded');
+</script>
+
+<%- include('partials/footer') %>
