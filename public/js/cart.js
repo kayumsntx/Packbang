@@ -112,7 +112,6 @@ $(document).ready(function() {
                         showNotification('✅ Added to cart!', 'success');
                     }
 
-                n
                     $display.addClass('bump');
                     setTimeout(() => $display.removeClass('bump'), 300);
                 } else {
