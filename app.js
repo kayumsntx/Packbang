@@ -616,7 +616,7 @@ async function loadUserCart(req, user) {
                 });
                 
                 await deleteGuestCart(guestSessionId);
-                res.clearCookie('guest_session_id');
+                // Note: cannot clear cookie here (no res reference); cookie will expire naturally
                 
                 if (req.session.cart.length > 0) {
                     await saveUserCart(user.id, req.session.cart);
@@ -1282,7 +1282,7 @@ app.get("/api/my-custom-orders", requireAuth, async (req, res) => {
 });
 
 // ---------- GET CUSTOMER'S OWN ORDERS ----------
-app.get("/api/my-custom-orders", requireAuth, async (req, res) => {
+app.get("/api/customer/my-custom-orders", requireAuth, async (req, res) => {
     try {
         const userId = req.session.user.id;
         const orders = await CustomOrder.find({ customerId: userId }).sort({ createdAt: -1 });
@@ -1463,12 +1463,81 @@ app.get("/admin/my-custom-orders", requireAdmin, (req, res) => {
     });
 });
 
+// Alias: navbar links to /admin/custom-orders
+app.get("/admin/custom-orders", requireAdmin, (req, res) => {
+    res.render("admin-custom-orders", {
+        user: req.session.user,
+        isGuest: false
+    });
+});
+
 // ---------- SELLER DASHBOARD (Bid on orders) ----------
 app.get("/seller/my-custom-orders", requireSellerOrAdmin, (req, res) => {
     res.render("seller-custom-orders", {
         user: req.session.user,
         isGuest: false
     });
+});
+
+// Alias: navbar links to /seller/custom-orders
+app.get("/seller/custom-orders", requireSellerOrAdmin, (req, res) => {
+    res.render("seller-custom-orders", {
+        user: req.session.user,
+        isGuest: false
+    });
+});
+
+// ---------- MAKE CUSTOM ORDER PAGE (public route for logged-in users) ----------
+app.get("/custom-orders", requireAuth, async (req, res) => {
+    try {
+        const categories = await Category.find().sort({ order: 1 });
+        res.render("make-custom-order", {
+            user: req.session.user,
+            isGuest: false,
+            categories: categories,
+            currentCategory: null
+        });
+    } catch (err) {
+        console.error("Custom order page error:", err);
+        res.status(500).send("Internal server error");
+    }
+});
+
+// ---------- PRODUCT DETAIL PAGE ----------
+app.get("/product/:productId", async (req, res) => {
+    try {
+        const product = await Product.findOne({ id: req.params.productId, isActive: true });
+        if (!product) {
+            return res.status(404).send("Product not found");
+        }
+
+        const categories = await Category.find().sort({ order: 1 });
+        const parentCategories = categories.filter(c => !c.parentId);
+        const childCategories = categories.filter(c => c.parentId);
+        const categoryTree = parentCategories.map(parent => ({
+            ...parent.toObject(),
+            children: childCategories.filter(child => child.parentId.toString() === parent._id.toString())
+        }));
+
+        // Related products from same category (excluding current)
+        const related = await Product.find({
+            isActive: true,
+            category: product.category,
+            id: { $ne: product.id }
+        }).limit(4);
+
+        res.render("product-details", {
+            product: product,
+            relatedProducts: related,
+            user: req.session.user || null,
+            isGuest: !req.session.user,
+            categories: categoryTree,
+            currentCategory: null
+        });
+    } catch (err) {
+        console.error("Product detail error:", err);
+        res.status(500).send("Internal server error");
+    }
 });
 // ---------- CATEGORY APIs ----------
 app.get('/api/categories', async (req, res) => {
@@ -1599,13 +1668,13 @@ app.post("/api/cart/add", async (req, res) => {
 
       const existingItem = req.session.cart.find(item => item.id === productId && item.size === size && item.color === color);
       if (existingItem) {
-        existingItem.quantity += quantity;
+        existingItem.quantity += requestedQty;
       } else {
         req.session.cart.push({
           id: targetProduct.id,
           name: targetProduct.name,
           price: getVariantPrice(targetProduct, size, color),
-          quantity: quantity,
+          quantity: requestedQty,
           imagePath: targetProduct.imagePath || '',
           size: size || '',
           color: color || ''
@@ -1632,13 +1701,13 @@ app.post("/api/cart/add", async (req, res) => {
 
       const existingItem = items.find(item => item.id === productId && item.size === size && item.color === color);
       if (existingItem) {
-        existingItem.quantity += quantity;
+        existingItem.quantity += requestedQty;
       } else {
         items.push({
           id: targetProduct.id,
           name: targetProduct.name,
           price: getVariantPrice(targetProduct, size, color),
-          quantity: quantity,
+          quantity: requestedQty,
           imagePath: targetProduct.imagePath || '',
           size: size || '',
           color: color || ''
