@@ -1029,21 +1029,21 @@ app.get("/", async (req, res) => {
       }
     }
 
-    // ✅ PackBang Banners লোড
+    // ✅ PackBang Banners 
 const banners = await Banner.find({ isActive: true }).sort({ order: 1 });
 
-    // ✅ এই অংশটি অবশ্যই try { } এর ভেতরে থাকতে হবে।
+
     const specialOffers = [
       {
-        title: "Summer Bundle",
-        description: "Get 15% off when buying a two bag together.",
-        badge: "Hot Deal",
-      },
-      {
-        title: "Laptop Bag Upgrade Promo",
-        description: "Free shipping and a premium .",
-        badge: "Limited Time",
-      },
+    title: "Bulk Order Discount",
+    description: "Get 10% off on orders above 500 pieces.",
+    badge: "Hot Deal",
+  },
+  {
+    title: "Free Delivery Promo",
+    description: "Free home delivery inside Dhaka on orders above 1000 BDT.",
+    badge: "Limited Time",
+  },
     ];
 
     res.render("home", {
