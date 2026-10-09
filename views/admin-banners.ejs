@@ -52,12 +52,12 @@
             <input type="file" id="bannerFiles" accept="image/*" multiple>
         </div>
         <small style="color:#718096; font-size:0.78rem; display:block; margin-bottom:10px;">
-            <i class="fas fa-info-circle"></i> একবারে সর্বোচ্চ <strong>১০টি</strong> ছবি সিলেক্ট করুন (Ctrl+Click বা Shift+Click)
+            <i class="fas fa-info-circle"></i> Select up to <strong>10 images</strong> at a time (Ctrl+Click or Shift+Click)
         </small>
 
         <div class="row">
-            <input type="text" id="bannerTitle" placeholder="Title (optional — সব ছবিতে একই থাকবে)">
-            <input type="text" id="bannerLink" placeholder="Link URL (optional, যেমন /?category=xyz)">
+            <input type="text" id="bannerTitle" placeholder="Title (optional — will be applied to all images)">
+            <input type="text" id="bannerLink" placeholder="Link URL (optional, e.g., /?category=xyz)">
             <button onclick="uploadBanner(event)">
                 <i class="fas fa-upload"></i> Upload Banners
             </button>
@@ -66,7 +66,7 @@
         <div id="packbangPreviewArea"></div>
 
         <small style="color:#718096; font-size:0.8rem; display:block; margin-top:12px;">
-            <i class="fas fa-magic"></i> Recommended size: <strong>1400 × 400 px</strong> — Cloudinary অটো resize করবে।
+            <i class="fas fa-magic"></i> Recommended size: <strong>1400 × 400 px</strong>
         </small>
     </div>
 
@@ -192,7 +192,7 @@
     // Delete Banner
     // ==========================================
     async function deleteBanner(id) {
-        if (!confirm('⚠️ এই ব্যানারটি ডিলিট করবেন?')) return;
+        if (!confirm('⚠️ Are you sure you want to delete this banner?')) return;
         await fetch('/api/admin/banners/' + id, { method: 'DELETE' });
         loadBanners();
     }
