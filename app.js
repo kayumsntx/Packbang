@@ -21,6 +21,8 @@ const steadfast = require("./steadfast");
 
 const Category = require("./models/Category");
 
+const Banner = require("./models/Banner");
+
 
 const app = express();
 const PORT = process.env.PORT || 8000; 
@@ -289,6 +291,23 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+
+// ==========================================
+// BANNER STORAGE (PackBang)
+// ==========================================
+const bannerStorage = new CloudinaryStorage({
+    cloudinary: cloudinary,
+    params: {
+        folder: 'packbang_banners',
+        allowed_formats: ['jpg', 'png', 'jpeg', 'webp'],
+        transformation: [{ width: 1400, height: 400, crop: 'fill', gravity: 'center' }]
+    },
+});
+
+const uploadBanner = multer({ 
+    storage: bannerStorage,
+    limits: { fileSize: 5 * 1024 * 1024 } // 5MB per file
+}).array('bannerImages', 10); 
 
 // ==========================================
 // EXPRESS SESSION CONFIGURATION
@@ -1010,6 +1029,9 @@ app.get("/", async (req, res) => {
       }
     }
 
+    // ✅ PackBang Banners লোড
+const banners = await Banner.find({ isActive: true }).sort({ order: 1 });
+
     // ✅ এই অংশটি অবশ্যই try { } এর ভেতরে থাকতে হবে।
     const specialOffers = [
       {
@@ -1025,8 +1047,9 @@ app.get("/", async (req, res) => {
     ];
 
     res.render("home", {
+      banners: banners,
       products: products,
-      offers: specialOffers, // ✅ এখানে ঠিকঠাক পাস হচ্ছে
+      offers: specialOffers, // 
       cartCount: cartCount,
       user: req.session.user || null,
       isGuest: !req.session.user,
@@ -1623,7 +1646,115 @@ app.delete('/api/admin/categories/:id', requireAdmin, async (req, res) => {
 
 
 
+// ==========================================
+// PACKBANG BANNER ROUTES
+// ==========================================
+
+// ---------- ADMIN BANNERS PAGE ----------
+app.get("/admin/banners", requireAdmin, (req, res) => {
+    res.render("admin-banners", { user: req.session.user, isGuest: false });
+});
+
+// ---------- PUBLIC: Active Banners (Home Page) ----------
+app.get('/api/banners', async (req, res) => {
+    try {
+        const banners = await Banner.find({ isActive: true }).sort({ order: 1 });
+        res.json(banners);
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
+
+// ---------- ADMIN: Get All Banners ----------
+app.get('/api/admin/banners', requireAdmin, async (req, res) => {
+    try {
+        const banners = await Banner.find().sort({ order: 1 });
+        res.json(banners);
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
+
+// ---------- ADMIN: Upload Multiple Banners ----------
+app.post('/api/admin/banners', requireAdmin, uploadBanner, async (req, res) => {
+    try {
+        const { title, link } = req.body;
+        
+        if (!req.files || req.files.length === 0) {
+            return res.status(400).json({ success: false, message: "অন্তত একটি ছবি দরকার" });
+        }
+
+        const lastBanner = await Banner.findOne().sort({ order: -1 });
+        let currentOrder = lastBanner ? lastBanner.order : 0;
+
+        const newBanners = [];
+        for (const file of req.files) {
+            currentOrder++;
+            const banner = new Banner({
+                imageUrl: file.path,
+                title: title || '',
+                link: link || '',
+                order: currentOrder,
+                isActive: true
+            });
+            await banner.save();
+            newBanners.push(banner);
+        }
+
+        res.json({ 
+            success: true, 
+            message: `${newBanners.length}টি ব্যানার আপলোড হয়েছে`,
+            banners: newBanners 
+        });
+    } catch (err) {
+        res.status(400).json({ success: false, message: err.message });
+    }
+});
+
+// ---------- ADMIN: Delete Banner ----------
+app.delete('/api/admin/banners/:id', requireAdmin, async (req, res) => {
+    try {
+        await Banner.findByIdAndDelete(req.params.id);
+        res.json({ success: true });
+    } catch (err) {
+        res.status(400).json({ success: false, message: err.message });
+    }
+});
+
+// ---------- ADMIN: Toggle Active/Hidden ----------
+app.put('/api/admin/banners/:id/toggle', requireAdmin, async (req, res) => {
+    try {
+        const banner = await Banner.findById(req.params.id);
+        if (!banner) return res.status(404).json({ success: false });
+        banner.isActive = !banner.isActive;
+        await banner.save();
+        res.json({ success: true, isActive: banner.isActive });
+    } catch (err) {
+        res.status(400).json({ success: false, message: err.message });
+    }
+});
+
+// ---------- ADMIN: Reorder ----------
+app.post('/api/admin/banners/reorder', requireAdmin, async (req, res) => {
+    try {
+        const { orderedIds } = req.body;
+        for (let i = 0; i < orderedIds.length; i++) {
+            await Banner.findByIdAndUpdate(orderedIds[i], { order: i + 1 });
+        }
+        res.json({ success: true });
+    } catch (err) {
+        res.status(400).json({ success: false, message: err.message });
+    }
+});
+
+
+
 // ---------- CART APIs ----------
+
+
+
+
+
 app.post("/api/cart/add", async (req, res) => {
   const { productId, quantity = 1, size = '', color = '' } = req.body;
   

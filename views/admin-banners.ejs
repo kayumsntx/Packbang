@@ -1,0 +1,225 @@
+<%- include('partials/header') %>
+
+<style>
+    .packbang-admin { max-width: 950px; margin: 20px auto; padding: 20px; }
+    .packbang-admin h2 { border-bottom: 3px solid #f39c12; padding-bottom: 12px; margin-bottom: 24px; color: #1a202c; display: flex; align-items: center; gap: 10px; }
+
+    /* ===== Upload Box ===== */
+    .packbang-upload { background: linear-gradient(135deg, #f7fafc, #edf2f7); border-radius: 12px; padding: 22px; margin-bottom: 26px; border: 1px solid #e2e8f0; }
+    .packbang-upload .row { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
+    .packbang-upload input[type="text"] { flex: 1; min-width: 180px; padding: 10px 14px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 0.9rem; outline: none; }
+    .packbang-upload input[type="text"]:focus { border-color: #f39c12; }
+    .packbang-upload input[type="file"] { flex: 1; min-width: 220px; padding: 10px; border: 2px dashed #cbd5e0; border-radius: 8px; background: white; cursor: pointer; }
+    .packbang-upload input[type="file"]:hover { border-color: #f39c12; background: #fef9e7; }
+    .packbang-upload button { padding: 10px 28px; background: linear-gradient(45deg, #f39c12, #e67e22); color: white; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 0.9rem; display: inline-flex; align-items: center; gap: 8px; }
+    .packbang-upload button:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 4px 15px rgba(243, 156, 18, 0.4); }
+    .packbang-upload button:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    #packbangPreviewArea { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+    #packbangPreviewArea img { width: 90px; height: 55px; object-fit: cover; border-radius: 6px; border: 2px solid #e2e8f0; }
+
+    /* ===== Banner List ===== */
+    .packbang-item { display: flex; gap: 14px; background: white; padding: 14px; border-radius: 12px; border: 1px solid #e2e8f0; margin-bottom: 12px; align-items: center; transition: all 0.2s; }
+    .packbang-item:hover { box-shadow: 0 4px 15px rgba(0,0,0,0.05); border-color: #f39c12; }
+    .packbang-item img { width: 200px; height: 76px; object-fit: cover; border-radius: 8px; border: 1px solid #e2e8f0; flex-shrink: 0; }
+    .packbang-item .info { flex: 1; min-width: 0; }
+    .packbang-item .info strong { display: block; color: #2d3748; font-size: 0.95rem; margin-bottom: 4px; }
+    .packbang-item .info small { color: #a0aec0; font-size: 0.75rem; }
+    .packbang-item .actions { display: flex; gap: 6px; flex-wrap: wrap; }
+    .packbang-item .actions button { padding: 7px 12px; border: none; border-radius: 6px; cursor: pointer; font-size: 0.78rem; font-weight: 600; transition: all 0.2s; }
+    .btn-up, .btn-down { background: #edf2f7; color: #4a5568; }
+    .btn-up:hover, .btn-down:hover { background: #cbd5e0; }
+    .btn-toggle { background: #bee3f8; color: #2a69ac; }
+    .btn-toggle.hidden { background: #fed7d7; color: #9b2c2c; }
+    .btn-del { background: #fed7d7; color: #9b2c2c; }
+    .btn-del:hover { background: #fc8181; color: white; }
+    .status-active { color: #27ae60; font-size: 0.75rem; font-weight: 700; }
+    .status-hidden { color: #e53e3e; font-size: 0.75rem; font-weight: 700; }
+
+    @media (max-width: 768px) {
+        .packbang-admin { padding: 12px; }
+        .packbang-item { flex-direction: column; align-items: stretch; }
+        .packbang-item img { width: 100%; height: 140px; }
+    }
+</style>
+
+<div class="packbang-admin">
+    <h2><i class="fas fa-images"></i> PackBang Banner Management</h2>
+
+    <!-- Upload Box -->
+    <div class="packbang-upload">
+        <div class="row">
+            <input type="file" id="bannerFiles" accept="image/*" multiple>
+        </div>
+        <small style="color:#718096; font-size:0.78rem; display:block; margin-bottom:10px;">
+            <i class="fas fa-info-circle"></i> একবারে সর্বোচ্চ <strong>১০টি</strong> ছবি সিলেক্ট করুন (Ctrl+Click বা Shift+Click)
+        </small>
+
+        <div class="row">
+            <input type="text" id="bannerTitle" placeholder="Title (optional — সব ছবিতে একই থাকবে)">
+            <input type="text" id="bannerLink" placeholder="Link URL (optional, যেমন /?category=xyz)">
+            <button onclick="uploadBanner(event)">
+                <i class="fas fa-upload"></i> Upload Banners
+            </button>
+        </div>
+
+        <div id="packbangPreviewArea"></div>
+
+        <small style="color:#718096; font-size:0.8rem; display:block; margin-top:12px;">
+            <i class="fas fa-magic"></i> Recommended size: <strong>1400 × 400 px</strong> — Cloudinary অটো resize করবে।
+        </small>
+    </div>
+
+    <!-- Banner List -->
+    <div id="packbangBannerList">
+        <p style="text-align:center;color:#a0aec0;padding:40px;">
+            <i class="fas fa-spinner fa-spin"></i> Loading banners...
+        </p>
+    </div>
+</div>
+
+<script>
+    // ==========================================
+    // Preview Handler (Multiple Files)
+    // ==========================================
+    document.addEventListener('DOMContentLoaded', function() {
+        const fileInput = document.getElementById('bannerFiles');
+        if (fileInput) {
+            fileInput.addEventListener('change', function() {
+                const preview = document.getElementById('packbangPreviewArea');
+                preview.innerHTML = '';
+                const files = Array.from(this.files).slice(0, 10);
+                files.forEach(file => {
+                    const reader = new FileReader();
+                    reader.onload = e => {
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+                        preview.appendChild(img);
+                    };
+                    reader.readAsDataURL(file);
+                });
+            });
+        }
+        loadBanners();
+    });
+
+    // ==========================================
+    // Load Banner List
+    // ==========================================
+    async function loadBanners() {
+        try {
+            const res = await fetch('/api/admin/banners');
+            const banners = await res.json();
+            const list = document.getElementById('packbangBannerList');
+
+            if (!banners.length) {
+                list.innerHTML = '<p style="text-align:center;color:#a0aec0;padding:40px;"><i class="fas fa-inbox"></i> No banners yet. Upload your first one above!</p>';
+                return;
+            }
+
+            list.innerHTML = banners.map((b, i) => `
+                <div class="packbang-item">
+                    <img src="${b.imageUrl}" alt="${b.title || 'banner'}">
+                    <div class="info">
+                        <strong>${b.title || 'Untitled Banner'}</strong>
+                        <small>
+                            ${b.isActive 
+                                ? '<span class="status-active">● ACTIVE</span>' 
+                                : '<span class="status-hidden">● HIDDEN</span>'
+                            } 
+                            • Order: ${b.order}
+                            ${b.link ? '• <i class="fas fa-link"></i> ' + b.link : ''}
+                        </small>
+                    </div>
+                    <div class="actions">
+                        <button class="btn-up" onclick="moveBanner(${i}, -1)">↑</button>
+                        <button class="btn-down" onclick="moveBanner(${i}, 1)">↓</button>
+                        <button class="btn-toggle ${b.isActive ? '' : 'hidden'}" onclick="toggleBanner('${b._id}')">
+                            ${b.isActive ? 'Hide' : 'Show'}
+                        </button>
+                        <button class="btn-del" onclick="deleteBanner('${b._id}')">Delete</button>
+                    </div>
+                </div>
+            `).join('');
+
+            window._packbangBanners = banners;
+        } catch (err) {
+            console.error(err);
+            document.getElementById('packbangBannerList').innerHTML = 
+                '<p style="color:#e53e3e;text-align:center;padding:40px;">Failed to load banners.</p>';
+        }
+    }
+
+    // ==========================================
+    // Upload Multiple Banners
+    // ==========================================
+    async function uploadBanner(event) {
+        const fileInput = document.getElementById('bannerFiles');
+        if (!fileInput.files.length) return alert('Please select at least one image');
+        if (fileInput.files.length > 10) return alert('Maximum 10 images at once');
+
+        const fd = new FormData();
+        Array.from(fileInput.files).forEach(file => fd.append('bannerImages', file));
+        fd.append('title', document.getElementById('bannerTitle').value);
+        fd.append('link', document.getElementById('bannerLink').value);
+
+        const btn = event.target.closest('button');
+        const original = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Uploading...';
+
+        try {
+            const res = await fetch('/api/admin/banners', { method: 'POST', body: fd });
+            const data = await res.json();
+            if (data.success) {
+                alert('✅ ' + data.message);
+                fileInput.value = '';
+                document.getElementById('bannerTitle').value = '';
+                document.getElementById('bannerLink').value = '';
+                document.getElementById('packbangPreviewArea').innerHTML = '';
+                loadBanners();
+            } else {
+                alert('❌ ' + (data.message || 'Upload failed'));
+            }
+        } catch (err) {
+            alert('❌ Upload failed. Please try again.');
+        }
+        btn.disabled = false;
+        btn.innerHTML = original;
+    }
+
+    // ==========================================
+    // Delete Banner
+    // ==========================================
+    async function deleteBanner(id) {
+        if (!confirm('⚠️ এই ব্যানারটি ডিলিট করবেন?')) return;
+        await fetch('/api/admin/banners/' + id, { method: 'DELETE' });
+        loadBanners();
+    }
+
+    // ==========================================
+    // Toggle Active/Hidden
+    // ==========================================
+    async function toggleBanner(id) {
+        await fetch('/api/admin/banners/' + id + '/toggle', { method: 'PUT' });
+        loadBanners();
+    }
+
+    // ==========================================
+    // Reorder (↑↓)
+    // ==========================================
+    async function moveBanner(index, dir) {
+        const arr = window._packbangBanners;
+        const ni = index + dir;
+        if (ni < 0 || ni >= arr.length) return;
+        [arr[index], arr[ni]] = [arr[ni], arr[index]];
+        await fetch('/api/admin/banners/reorder', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ orderedIds: arr.map(b => b._id) })
+        });
+        loadBanners();
+    }
+</script>
+
+<%- include('partials/footer') %>
