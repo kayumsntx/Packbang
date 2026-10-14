@@ -10,8 +10,8 @@
     .page-header .order-count { background: #edf2f7; color: #4a5568; padding: 6px 16px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; }
 
     /* ===== ORDER CARD (TruckLagbe Style) ===== */
-    .order-card { background: white; border-radius: 14px; border: 1px solid #e2e8f0; padding: 22px 26px; margin-bottom: 20px; transition: all 0.3s ease; position: relative; overflow: hidden; }
-    .order-card:hover { box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08); border-color: #f39c12; transform: translateY(-2px); }
+    .order-card { background: white; border-radius: 14px; border: 1px solid #e2e8f0; padding: 22px 26px; margin-bottom: 24px; transition: all 0.3s ease; position: relative; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.03); }
+    .order-card:hover { box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08); border-color: #f39c12; transform: translateY(-2px); }
     .order-card::before { content: ''; position: absolute; top: 0; left: 0; width: 5px; height: 100%; background: #e2e8f0; transition: background 0.3s ease; }
     .order-card.status-pending::before { background: #f39c12; }
     .order-card.status-approved::before { background: #27ae60; }
@@ -52,16 +52,6 @@
     .order-images .img-thumb { width: 80px; height: 80px; object-fit: cover; border-radius: 10px; border: 2px solid #e2e8f0; transition: all 0.3s ease; cursor: pointer; }
     .order-images .img-thumb:hover { border-color: #f39c12; transform: scale(1.08); box-shadow: 0 4px 15px rgba(243, 156, 18, 0.3); }
 
-    /* ===== BID INFO (TruckLagbe Style) ===== */
-    .bid-info { background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%); border-radius: 12px; padding: 16px 20px; margin-top: 14px; border: 1px solid #e2e8f0; }
-    .bid-info .bid-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
-    .bid-info .bid-header strong { color: #2d3748; display: flex; align-items: center; gap: 6px; }
-    .bid-info .bid-amount { font-weight: 800; color: #2b6cb0; font-size: 1.1rem; }
-    .bid-info .bid-status { font-size: 0.7rem; font-weight: 700; padding: 3px 14px; border-radius: 12px; }
-    .bid-status-accepted { background: #c6f6d5; color: #276749; }
-    .bid-status-pending { background: #fefcbf; color: #975a16; }
-    .bid-status-rejected { background: #fed7d7; color: #9b2c2c; }
-
     /* ===== ADMIN NOTE ===== */
     .admin-note { background: #ebf8ff; border-left: 4px solid #3182ce; padding: 12px 16px; border-radius: 8px; font-size: 0.85rem; color: #2a69ac; margin-top: 12px; }
     .admin-note strong { color: #1a365d; }
@@ -73,6 +63,103 @@
     .empty-state .btn-shop { display: inline-block; margin-top: 16px; padding: 12px 32px; background: linear-gradient(45deg, #f39c12, #e67e22); color: white; border-radius: 10px; text-decoration: none; font-weight: 700; transition: all 0.3s ease; }
     .empty-state .btn-shop:hover { transform: translateY(-2px); box-shadow: 0 6px 25px rgba(243, 156, 18, 0.4); }
 
+    /* ===== TRUCK LAGBE STYLE BIDDING UI ===== */
+    .trucklagbe-bids-container { margin-top: 20px; padding-top: 18px; border-top: 2px dashed #e2e8f0; }
+    .bids-section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 8px; }
+    .bids-section-header h4 { margin: 0; font-size: 1.05rem; font-weight: 800; color: #1e293b; display: flex; align-items: center; gap: 8px; }
+    .pulse-indicator { width: 10px; height: 10px; background: #10b981; border-radius: 50%; box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); animation: tlPulse 1.8s infinite; }
+    @keyframes tlPulse { 0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); } 70% { transform: scale(1); box-shadow: 0 0 0 7px rgba(16, 185, 129, 0); } 100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); } }
+    .bids-badge-sub { font-size: 0.75rem; background: #fef3c7; color: #92400e; font-weight: 700; padding: 3px 10px; border-radius: 20px; border: 1px solid #fde68a; }
+
+    .bids-waiting-box { background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 12px; padding: 18px; display: flex; align-items: center; gap: 14px; color: #64748b; }
+    .bids-waiting-box i { font-size: 1.6rem; color: #f59e0b; }
+    .bids-waiting-box strong { display: block; color: #334155; font-size: 0.95rem; margin-bottom: 3px; }
+    .bids-waiting-box p { margin: 0; font-size: 0.85rem; }
+
+    .bids-cards-grid { display: flex; flex-direction: column; gap: 12px; }
+    .bid-card-tl { background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 12px; padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; gap: 18px; flex-wrap: wrap; transition: all 0.25s ease; position: relative; box-shadow: 0 2px 6px rgba(0,0,0,0.03); }
+    .bid-card-tl:hover { border-color: #f59e0b; box-shadow: 0 8px 24px rgba(245, 158, 11, 0.12); transform: translateY(-1px); }
+    .bid-card-tl.is-accepted { border-color: #10b981; background: #f0fdf4; }
+    .bid-card-tl.is-rejected { border-color: #fca5a5; opacity: 0.65; background: #fff5f5; }
+
+    .bid-seller-info { display: flex; align-items: flex-start; gap: 14px; flex: 1 1 300px; min-width: 260px; }
+    .seller-avatar { width: 44px; height: 44px; background: linear-gradient(135deg, #eff6ff, #dbeafe); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; color: #2563eb; position: relative; flex-shrink: 0; border: 1px solid #bfdbfe; }
+    .seller-avatar .verified-dot { position: absolute; bottom: -4px; right: -4px; width: 16px; height: 16px; background: #10b981; border-radius: 50%; color: white; font-size: 9px; display: flex; align-items: center; justify-content: center; border: 2px solid white; }
+    .seller-details { display: flex; flex-direction: column; gap: 4px; }
+    .seller-title-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .seller-name { font-weight: 800; font-size: 0.98rem; color: #0f172a; }
+    .verified-tag { background: #ecfdf5; color: #065f46; font-size: 0.7rem; font-weight: 800; padding: 2px 8px; border-radius: 4px; border: 1px solid #a7f3d0; display: inline-flex; align-items: center; gap: 4px; }
+    .seller-meta-row { display: flex; align-items: center; gap: 10px; font-size: 0.8rem; color: #64748b; flex-wrap: wrap; }
+    .seller-rating { color: #d97706; font-weight: 700; display: inline-flex; align-items: center; gap: 4px; }
+    .delivery-time-tag { background: #f1f5f9; padding: 2px 8px; border-radius: 6px; font-weight: 600; color: #475569; display: inline-flex; align-items: center; gap: 5px; }
+    .bid-note-text { font-size: 0.84rem; color: #475569; background: #f8fafc; padding: 6px 10px; border-radius: 6px; border-left: 3px solid #cbd5e1; margin-top: 4px; font-style: italic; }
+
+    .bid-pricing-box { text-align: right; flex: 0 0 auto; min-width: 150px; }
+    .unit-price-label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.5px; color: #64748b; font-weight: 700; display: block; }
+    .bid-pricing-box .price-val { font-size: 1.35rem; font-weight: 900; color: #FF5A1F; line-height: 1.2; }
+    .bid-pricing-box .price-val small { font-size: 0.8rem; color: #64748b; font-weight: 600; }
+    .bid-pricing-box .total-est { font-size: 0.8rem; color: #059669; font-weight: 700; margin-top: 3px; }
+
+    .bid-actions-box { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .btn-group-tl { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .btn-tl-chat { background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; padding: 8px 14px; border-radius: 8px; font-size: 0.82rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s; }
+    .btn-tl-chat:hover { background: #dbeafe; transform: translateY(-1px); }
+    .btn-tl-accept { background: #10b981; color: white; border: none; padding: 8px 16px; border-radius: 8px; font-size: 0.82rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s; box-shadow: 0 2px 6px rgba(16, 185, 129, 0.3); }
+    .btn-tl-accept:hover { background: #059669; transform: translateY(-1px); }
+    .btn-tl-reject { background: #fff; color: #dc2626; border: 1px solid #fecaca; padding: 8px 12px; border-radius: 8px; font-size: 0.82rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; transition: all 0.2s; }
+    .btn-tl-reject:hover { background: #fef2f2; }
+
+    .bid-status-pill { font-size: 0.78rem; font-weight: 800; padding: 4px 12px; border-radius: 20px; display: inline-flex; align-items: center; gap: 5px; text-transform: uppercase; letter-spacing: 0.3px; }
+    .accepted-pill { background: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; }
+    .rejected-pill { background: #fee2e2; color: #991b1b; }
+    .pending-pill { background: #fef3c7; color: #92400e; }
+
+    /* ===== SAFE CHAT MODAL (FIVERR/UPWORK STYLE) ===== */
+    .safe-chat-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 99999; display: flex; align-items: center; justify-content: center; padding: 16px; }
+    .chat-modal-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.65); backdrop-filter: blur(4px); }
+    .chat-modal-content { position: relative; width: 100%; max-width: 580px; background: #ffffff; border-radius: 16px; box-shadow: 0 25px 60px rgba(0,0,0,0.25); display: flex; flex-direction: column; max-height: 90vh; overflow: hidden; animation: chatPop 0.25s ease-out; }
+    @keyframes chatPop { 0% { transform: scale(0.95); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+
+    .chat-modal-header { padding: 16px 20px; background: #0f172a; color: white; display: flex; justify-content: space-between; align-items: center; }
+    .chat-partner-info { display: flex; align-items: center; gap: 12px; }
+    .chat-avatar { width: 38px; height: 38px; background: #FF5A1F; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; color: white; }
+    .chat-partner-info h4 { margin: 0; font-size: 1rem; font-weight: 800; color: white; }
+    .chat-order-ref { font-size: 0.75rem; color: #94a3b8; }
+    .chat-close-btn { background: none; border: none; color: #94a3b8; font-size: 1.6rem; cursor: pointer; line-height: 1; padding: 0; }
+    .chat-close-btn:hover { color: white; }
+
+    .chat-safety-banner { background: #fffbeb; border-bottom: 1px solid #fef3c7; padding: 10px 16px; display: flex; align-items: flex-start; gap: 10px; font-size: 0.78rem; color: #92400e; }
+    .chat-safety-banner i { color: #f59e0b; font-size: 1.1rem; margin-top: 2px; flex-shrink: 0; }
+    .chat-safety-banner strong { display: block; color: #78350f; font-weight: 800; margin-bottom: 2px; }
+    .chat-safety-banner p { margin: 0; line-height: 1.35; }
+
+    .chat-messages-container { flex: 1 1 auto; overflow-y: auto; padding: 16px 20px; background: #f8fafc; display: flex; flex-direction: column; gap: 12px; min-height: 260px; max-height: 380px; }
+    .chat-loading, .chat-empty-thread, .chat-error { text-align: center; color: #94a3b8; font-size: 0.88rem; margin: auto; padding: 20px; }
+    .chat-empty-thread i { font-size: 2.2rem; display: block; margin-bottom: 10px; color: #cbd5e1; }
+
+    .chat-bubble-row { display: flex; width: 100%; }
+    .msg-outgoing { justify-content: flex-end; }
+    .msg-incoming { justify-content: flex-start; }
+    .chat-bubble { max-width: 80%; padding: 10px 14px; border-radius: 12px; position: relative; font-size: 0.88rem; line-height: 1.45; word-break: break-word; }
+    .msg-outgoing .chat-bubble { background: #FF5A1F; color: white; border-bottom-right-radius: 2px; }
+    .msg-incoming .chat-bubble { background: #ffffff; color: #0f172a; border: 1px solid #e2e8f0; border-bottom-left-radius: 2px; box-shadow: 0 1px 4px rgba(0,0,0,0.04); }
+    .msg-sender-name { font-size: 0.7rem; font-weight: 800; opacity: 0.8; margin-bottom: 2px; }
+    .msg-body { margin-bottom: 4px; }
+    .msg-time { font-size: 0.68rem; opacity: 0.75; text-align: right; }
+    .chat-bubble-system { background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 8px; padding: 6px 12px; font-size: 0.78rem; color: #475569; text-align: center; margin: 4px auto; display: inline-flex; align-items: center; gap: 6px; }
+
+    .chat-filter-warning { background: #fef2f2; border-top: 1px solid #fee2e2; border-bottom: 1px solid #fee2e2; padding: 8px 16px; color: #dc2626; font-size: 0.8rem; font-weight: 700; display: flex; align-items: center; gap: 8px; animation: warnShake 0.3s; }
+    @keyframes warnShake { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-4px); } 40%, 80% { transform: translateX(4px); } }
+
+    .chat-input-form { padding: 12px 18px 16px; background: white; border-top: 1px solid #e2e8f0; }
+    .chat-input-wrapper { display: flex; gap: 10px; align-items: flex-end; }
+    .chat-input-wrapper textarea { flex: 1; padding: 10px 14px; border: 1.5px solid #cbd5e1; border-radius: 10px; font-size: 0.88rem; font-family: inherit; resize: none; outline: none; transition: all 0.2s; }
+    .chat-input-wrapper textarea:focus { border-color: #FF5A1F; box-shadow: 0 0 0 3px rgba(255, 90, 31, 0.15); }
+    .chat-send-btn { background: #FF5A1F; color: white; border: none; padding: 10px 18px; border-radius: 10px; font-weight: 700; font-size: 0.88rem; cursor: pointer; transition: all 0.2s; height: 42px; display: inline-flex; align-items: center; gap: 6px; }
+    .chat-send-btn:hover { background: #ea580c; }
+    .chat-send-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .chat-char-notice { margin-top: 6px; font-size: 0.72rem; color: #94a3b8; display: flex; justify-content: space-between; }
+
     /* ===== RESPONSIVE ===== */
     @media (max-width: 768px) {
         .my-orders-page { padding: 12px; }
@@ -80,7 +167,8 @@
         .order-card .order-header { flex-direction: column; align-items: flex-start; }
         .order-card .order-meta { flex-direction: column; gap: 6px; }
         .order-images .img-thumb { width: 60px; height: 60px; }
-        .bid-info .bid-header { flex-direction: column; align-items: flex-start; }
+        .bid-card-tl { flex-direction: column; align-items: flex-start; }
+        .bid-pricing-box { text-align: left; }
         .timer-badge { width: 100%; justify-content: center; }
     }
 
@@ -89,6 +177,8 @@
         .order-card .order-title { font-size: 1rem; }
         .order-card .order-description { font-size: 0.82rem; padding: 10px 12px; }
         .order-images .img-thumb { width: 50px; height: 50px; }
+        .btn-group-tl { width: 100%; }
+        .btn-group-tl button { flex: 1; justify-content: center; }
     }
 </style>
 
@@ -99,25 +189,26 @@
         <span class="order-count"><i class="fas fa-file-alt"></i> <%= orders ? orders.length : 0 %> order(s)</span>
     </div>
 
-    <!-- ===== ORDERS LIST ===== -->
     <% if (orders && orders.length > 0) { %>
         <% orders.forEach(order => { %>
-            <div class="order-card status-<%= order.status %>">
-                <!-- Header -->
+            <div class="order-card status-<%= order.status %>" id="order-card-<%= order.id %>">
+                <!-- Header: Title, ID, Timer, Status -->
                 <div class="order-header">
                     <div>
-                        <span class="order-title">
+                        <h3 class="order-title">
                             <%= order.title %>
                             <span class="order-id">#<%= order.id %></span>
-                        </span>
+                        </h3>
                     </div>
-                    <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
-                        <!-- ✅ ২৪ ঘণ্টার কাউন্টডাউন টাইমার -->
-                      <div class="timer-badge" 
-     data-start-time="<%= order.status === 'approved' ? new Date(order.updatedAt).getTime() : new Date(order.createdAt).getTime() %>" 
-     data-order-status="<%= order.status %>">
-                            <i class="fas fa-clock"></i> <span class="timer-value">--:--:--</span>
-                        </div>
+                    <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                        <!-- Countdown Timer (TruckLagbe Style) -->
+                        <span class="timer-badge" 
+                              data-created-at="<%= new Date(order.createdAt).getTime() %>" 
+                              data-order-status="<%= order.status %>">
+                            <i class="fas fa-stopwatch"></i>
+                            <span class="timer-value">Calculating...</span>
+                        </span>
+
                         <span class="status-badge status-<%= order.status %>">
                             <i class="fas <%= order.status === 'pending' ? 'fa-clock' : (order.status === 'approved' ? 'fa-check-circle' : (order.status === 'rejected' ? 'fa-times-circle' : (order.status === 'assigned' ? 'fa-user-check' : 'fa-check-double'))) %>"></i>
                             <%= order.status.charAt(0).toUpperCase() + order.status.slice(1) %>
@@ -132,7 +223,7 @@
                         <span><i class="fas fa-money-bill-wave"></i> Budget: BDT. <%= order.budget.toFixed(2) %></span>
                     <% } %>
                     <% if (order.quantity && order.quantity > 1) { %>
-                        <span><i class="fas fa-cubes"></i> Qty: <%= order.quantity %></span>
+                        <span><i class="fas fa-cubes"></i> Qty: <%= order.quantity.toLocaleString() %> pcs</span>
                     <% } %>
                     <% if (order.deadline) { %>
                         <span><i class="fas fa-hourglass-end"></i> Deadline: <%= new Date(order.deadline).toLocaleDateString('en-BD', { day: '2-digit', month: 'short', year: 'numeric' }) %></span>
@@ -146,7 +237,7 @@
                 <% if (order.images && order.images.length > 0) { %>
                     <div class="order-images">
                         <% order.images.forEach(img => { %>
-                            <img src="<%= img %>" alt="Reference Image" class="img-thumb" onclick="window.open('<%= img %>', '_blank')">
+                            <img src="<%= img %>" alt="Reference Image" class="img-thumb">
                         <% }) %>
                     </div>
                 <% } %>
@@ -156,58 +247,111 @@
                     <div class="admin-note"><strong><i class="fas fa-user-shield"></i> Admin Note:</strong> <%= order.adminNotes %></div>
                 <% } %>
 
-                <!-- ✅ Assigned Bid Info -->
-                <% if ((order.status === 'assigned' || order.status === 'completed') && order.selectedBidId) { %>
-                    <% const selectedBid = order.bids.find(b => b._id.toString() === order.selectedBidId.toString()); %>
-                    <% if (selectedBid) { %>
-                        <div class="bid-info">
-                            <div class="bid-header">
-                                <div>
-                                    <strong><i class="fas fa-handshake"></i> Assigned to:</strong>
-                                    <%= selectedBid.sellerName %>
-                                    <span style="font-size:0.8rem; color:#718096; margin-left:8px;">(Bid: <span class="bid-amount">BDT. <%= selectedBid.amount.toFixed(2) %></span>)</span>
-                                </div>
-                                <span class="bid-status bid-status-accepted"><i class="fas fa-check-circle"></i> Accepted</span>
-                            </div>
-                            <% if (selectedBid.deliveryTime) { %>
-                                <div style="margin-top:6px; font-size:0.8rem; color:#718096;"><i class="fas fa-truck"></i> Delivery: <%= selectedBid.deliveryTime %></div>
-                            <% } %>
-                            <% if (selectedBid.note) { %>
-                                <div style="margin-top:4px; font-size:0.8rem; color:#718096;"><i class="fas fa-comment"></i> Note: <%= selectedBid.note %></div>
-                            <% } %>
+                <!-- ===== TRUCK LAGBE STYLE LIVE SUPPLIER BIDS SECTION ===== -->
+                <% if (order.status === 'approved' || order.status === 'assigned' || order.status === 'completed') { %>
+                    <div class="trucklagbe-bids-container">
+                        <div class="bids-section-header">
+                            <h4>
+                                <span class="pulse-indicator"></span>
+                                Live Factory Quotations (<%= order.bids ? order.bids.length : 0 %>)
+                            </h4>
+                            <span class="bids-badge-sub">Direct Factory Bidding</span>
                         </div>
-                    <% } %>
+
+                        <% if (!order.bids || order.bids.length === 0) { %>
+                            <div class="bids-waiting-box">
+                                <i class="fas fa-clock fa-spin"></i>
+                                <div>
+                                    <strong>Awaiting Factory Quotes</strong>
+                                    <p>Packaging manufacturers are reviewing your specs. Live unit price bids will appear here as soon as submitted.</p>
+                                </div>
+                            </div>
+                        <% } else { %>
+                            <div class="bids-cards-grid">
+                                <% order.bids.forEach(bid => { %>
+                                    <div class="bid-card-tl <%= bid.status === 'accepted' ? 'is-accepted' : (bid.status === 'rejected' ? 'is-rejected' : 'is-pending') %>" id="bid-card-<%= bid._id %>">
+                                        <!-- Left: Supplier Brand & Verified Info -->
+                                        <div class="bid-seller-info">
+                                            <div class="seller-avatar">
+                                                <i class="fas fa-industry"></i>
+                                                <span class="verified-dot" title="Verified Packaging Manufacturer"><i class="fas fa-check"></i></span>
+                                            </div>
+                                            <div class="seller-details">
+                                                <div class="seller-title-row">
+                                                    <span class="seller-name"><%= bid.sellerName %></span>
+                                                    <span class="verified-tag"><i class="fas fa-shield-alt"></i> Verified Supplier</span>
+                                                </div>
+                                                <div class="seller-meta-row">
+                                                    <span class="seller-rating"><i class="fas fa-star"></i> 4.9 (Factory Direct)</span>
+                                                    <% if (bid.deliveryTime) { %>
+                                                        <span class="delivery-time-tag"><i class="fas fa-truck-fast"></i> <%= bid.deliveryTime %></span>
+                                                    <% } %>
+                                                </div>
+                                                <% if (bid.note) { %>
+                                                    <div class="bid-note-text">
+                                                        <i class="fas fa-quote-left"></i> <%= bid.note %>
+                                                    </div>
+                                                <% } %>
+                                            </div>
+                                        </div>
+
+                                        <!-- Middle: Price Box -->
+                                        <div class="bid-pricing-box">
+                                            <span class="unit-price-label">Quoted Price</span>
+                                            <div class="price-val">BDT. <%= bid.amount.toFixed(2) %> <small>/ pc</small></div>
+                                            <% if (order.quantity && order.quantity > 1) { %>
+                                                <div class="total-est">Total: BDT. <%= (bid.amount * order.quantity).toLocaleString('en-BD', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></div>
+                                            <% } %>
+                                        </div>
+
+                                        <!-- Right: Action Bar (Message, Accept, Decline) -->
+                                        <div class="bid-actions-box">
+                                            <% if (bid.status === 'accepted') { %>
+                                                <div class="bid-status-pill accepted-pill"><i class="fas fa-check-circle"></i> Assigned Supplier</div>
+                                                <button type="button" class="btn-tl-chat" onclick="openSafeChatModal('<%= order.id %>', '<%= bid.sellerId %>', '<%= bid.sellerName %>')">
+                                                    <i class="fas fa-comments"></i> Send Message
+                                                </button>
+                                            <% } else if (bid.status === 'rejected') { %>
+                                                <div class="bid-status-pill rejected-pill"><i class="fas fa-times-circle"></i> Declined</div>
+                                            <% } else if (order.status === 'approved') { %>
+                                                <div class="btn-group-tl">
+                                                    <button type="button" class="btn-tl-chat" onclick="openSafeChatModal('<%= order.id %>', '<%= bid.sellerId %>', '<%= bid.sellerName %>')">
+                                                        <i class="fas fa-comments"></i> Send Message
+                                                    </button>
+                                                    <button type="button" class="btn-tl-accept" onclick="decideBid('<%= order.id %>', '<%= bid._id %>', 'accept')">
+                                                        <i class="fas fa-check"></i> Accept Quote
+                                                    </button>
+                                                    <button type="button" class="btn-tl-reject" onclick="decideBid('<%= order.id %>', '<%= bid._id %>', 'reject')">
+                                                        <i class="fas fa-times"></i> Decline
+                                                    </button>
+                                                </div>
+                                            <% } else { %>
+                                                <div class="bid-status-pill pending-pill">Pending</div>
+                                                <button type="button" class="btn-tl-chat" onclick="openSafeChatModal('<%= order.id %>', '<%= bid.sellerId %>', '<%= bid.sellerName %>')">
+                                                    <i class="fas fa-comments"></i> Send Message
+                                                </button>
+                                            <% } %>
+                                        </div>
+                                    </div>
+                                <% }) %>
+                            </div>
+                        <% } %>
+                    </div>
                 <% } %>
 
-                <!-- Pending Info -->
+                <!-- Pending Status Info -->
                 <% if (order.status === 'pending') { %>
                     <div style="margin-top:12px; font-size:0.8rem; color:#a0aec0;">
-                        <i class="fas fa-info-circle"></i> This order is waiting for admin approval.
+                        <i class="fas fa-info-circle"></i> This order is undergoing rapid review by PackBang admins. Once approved, suppliers will place competitive bids.
                         <span style="display:block; margin-top:4px; font-size:0.75rem;"><i class="fas fa-clock"></i> Submitted on <%= new Date(order.createdAt).toLocaleString() %></span>
                     </div>
                 <% } %>
 
-                <!-- Rejected Info -->
+                <!-- Rejected Status Info -->
                 <% if (order.status === 'rejected') { %>
                     <div style="margin-top:12px; font-size:0.8rem; color:#e53e3e;">
-                        <i class="fas fa-exclamation-circle"></i> This order has been rejected by the admin.
+                        <i class="fas fa-exclamation-circle"></i> This order was not approved for bidding.
                         <% if (order.adminNotes) { %><br><span style="color:#4a5568;"><strong>Reason:</strong> <%= order.adminNotes %></span><% } %>
-                    </div>
-                <% } %>
-
-                <!-- Approved Info -->
-                <% if (order.status === 'approved') { %>
-                    <div style="margin-top:12px; font-size:0.8rem; color:#2b6cb0;">
-                        <i class="fas fa-check-circle"></i> This order is approved and open for bidding.
-                        <span style="display:block; margin-top:4px; font-size:0.75rem; color:#718096;"><i class="fas fa-users"></i> <%= order.bids ? order.bids.length : 0 %> bid(s) received</span>
-                    </div>
-                <% } %>
-
-                <!-- Completed Info -->
-                <% if (order.status === 'completed') { %>
-                    <div style="margin-top:12px; font-size:0.8rem; color:#27ae60;">
-                        <i class="fas fa-check-double"></i> This order has been completed successfully!
-                        <span style="display:block; margin-top:4px; font-size:0.75rem; color:#718096;"><i class="fas fa-calendar-check"></i> Completed on <%= new Date(order.updatedAt).toLocaleDateString() %></span>
                     </div>
                 <% } %>
             </div>
@@ -217,79 +361,91 @@
         <div class="empty-state">
             <i class="fas fa-inbox"></i>
             <h3>No Custom Orders Yet</h3>
-            <p>You haven't created any custom orders yet.</p>
+            <p>You haven't created any custom packaging requests yet.</p>
             <a href="/custom-order" class="btn-shop"><i class="fas fa-pencil-alt"></i> Create Your First Custom Order</a>
         </div>
     <% } %>
 </div>
 
+<!-- ===== SAFE CHAT MODAL (FIVERR/UPWORK STYLE ANTI-DISINTERMEDIATION) ===== -->
+<div id="safeChatModal" class="safe-chat-modal" style="display: none;">
+    <div class="chat-modal-overlay" onclick="closeSafeChatModal()"></div>
+    <div class="chat-modal-content">
+        <!-- Header -->
+        <div class="chat-modal-header">
+            <div class="chat-partner-info">
+                <div class="chat-avatar"><i class="fas fa-industry"></i></div>
+                <div>
+                    <h4 id="chatSellerName">Packaging Supplier</h4>
+                    <span class="chat-order-ref" id="chatOrderRef">Order #...</span>
+                </div>
+            </div>
+            <button class="chat-close-btn" onclick="closeSafeChatModal()">&times;</button>
+        </div>
+
+        <!-- Safety Shield Banner -->
+        <div class="chat-safety-banner">
+            <i class="fas fa-shield-alt"></i>
+            <div>
+                <strong>PackBang Safety & Warranty Shield</strong>
+                <p>Sharing personal mobile numbers, emails, WhatsApp, or outside payments is prohibited. Deals outside PackBang are not protected by warranty.</p>
+            </div>
+        </div>
+
+        <!-- Messages Thread -->
+        <div class="chat-messages-container" id="chatMessagesContainer">
+            <div class="chat-loading"><i class="fas fa-spinner fa-spin"></i> Loading conversation...</div>
+        </div>
+
+        <!-- Filter Warning -->
+        <div id="chatFilterWarning" class="chat-filter-warning" style="display: none;">
+            <i class="fas fa-exclamation-triangle"></i>
+            <span id="chatFilterWarningText">Contact details not permitted.</span>
+        </div>
+
+        <!-- Chat Input Form -->
+        <form id="safeChatForm" onsubmit="sendSafeMessage(event)" class="chat-input-form">
+            <input type="hidden" id="currentChatOrderId" value="">
+            <input type="hidden" id="currentChatSellerId" value="">
+            <div class="chat-input-wrapper">
+                <textarea 
+                    id="chatMessageInput" 
+                    placeholder="Ask regarding paper GSM, box fluting, sample delivery, or finishing..." 
+                    rows="2" 
+                    oninput="handleChatInputCheck(this)"
+                    required
+                ></textarea>
+                <button type="submit" id="chatSendBtn" class="chat-send-btn">
+                    <i class="fas fa-paper-plane"></i> Send
+                </button>
+            </div>
+            <div class="chat-char-notice">
+                <span><i class="fas fa-lock"></i> Protected customer-supplier messaging</span>
+            </div>
+        </form>
+    </div>
+</div>
+
 <script>
     console.log('✅ My Custom Orders Page Loaded');
 
-    // ============================================
-    // ✅ ২৪ ঘণ্টার কাউন্টডাউন টাইমার (TruckLagbe Style)
-    // ============================================
-    // প্রতিটি অর্ডারের createdAt টাইমস্ট্যাম্প থেকে ২৪ ঘণ্টা যোগ করে
-    // অবশিষ্ট সময় প্রতি সেকেন্ডে আপডেট করা হয়। ৬ ঘণ্টার কম হলে কমলা,
-    // সময় শেষ হলে লাল রঙে "Bidding Closed" দেখানো হয়।
-
+    // 24 Hour Countdown Timer
     document.querySelectorAll('.timer-badge').forEach(function (badge) {
-    const startTime = parseInt(badge.getAttribute('data-start-time'), 10);
-    const orderStatus = badge.getAttribute('data-order-status');
-
-    // ✅ যে স্ট্যাটাসে টাইমার দেখানোর দরকার নেই
-    if (orderStatus === 'rejected' || orderStatus === 'assigned' || orderStatus === 'completed') {
-        badge.style.display = 'none';
-        return;
-    }
-
-    // ✅ Pending (অ্যাডমিন অ্যাপ্রুভের অপেক্ষায়) — টাইমার লুকানো
-    if (orderStatus === 'pending') {
-        badge.style.display = 'none';
-        return;
-    }
-
-    // ✅ Approved — এখানেই ২৪ ঘণ্টার কাউন্টডাউন চলবে
-    const deadline = startTime + (24 * 60 * 60 * 1000);
-
-    function updateTimer() {
-        const now = Date.now();
-        const remaining = deadline - now;
-
-        if (remaining <= 0) {
-            badge.className = 'timer-badge bidding-closed';
-            badge.querySelector('.timer-value').textContent = 'Bidding Closed';
-            clearInterval(timerInterval);
-            return;
-        }
-
-        const hours = Math.floor(remaining / (1000 * 60 * 60));
-        const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
-        const seconds = Math.floor((remaining % (1000 * 60)) / 1000);
-
-        const formatted = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-        badge.querySelector('.timer-value').textContent = formatted;
-
-        if (remaining <= 6 * 60 * 60 * 1000) {
-            badge.className = 'timer-badge bidding-closing';
-        } else {
-            badge.className = 'timer-badge bidding-open';
-        }
-    }
-
-    updateTimer();
-    const timerInterval = setInterval(updateTimer, 1000);
-});
         const createdAt = parseInt(badge.getAttribute('data-created-at'), 10);
         const orderStatus = badge.getAttribute('data-order-status');
 
-        // ইতিমধ্যে Approved/Assigned/Completed হলে টাইমার দেখানোর দরকার নেই
-        if (orderStatus === 'approved' || orderStatus === 'assigned' || orderStatus === 'completed' || orderStatus === 'rejected') {
+        if (orderStatus === 'rejected' || orderStatus === 'assigned' || orderStatus === 'completed') {
             badge.style.display = 'none';
             return;
         }
 
-        const deadline = createdAt + (24 * 60 * 60 * 1000); // ২৪ ঘণ্টা পর
+        if (orderStatus === 'pending') {
+            badge.className = 'timer-badge bidding-closing';
+            badge.querySelector('.timer-value').textContent = 'Pending Approval';
+            return;
+        }
+
+        const deadline = createdAt + (24 * 60 * 60 * 1000);
 
         function updateTimer() {
             const now = Date.now();
@@ -306,10 +462,9 @@
             const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
             const seconds = Math.floor((remaining % (1000 * 60)) / 1000);
 
-            const formatted = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            const formatted = String(hours).padStart(2, '0') + ':' + String(minutes).padStart(2, '0') + ':' + String(seconds).padStart(2, '0');
             badge.querySelector('.timer-value').textContent = formatted;
 
-            // ৬ ঘণ্টার কম হলে কমলা ওয়ার্নিং
             if (remaining <= 6 * 60 * 60 * 1000) {
                 badge.className = 'timer-badge bidding-closing';
             } else {
@@ -319,16 +474,173 @@
 
         updateTimer();
         const timerInterval = setInterval(updateTimer, 1000);
-    
+    });
 
-    // ============================================
-    // ইমেজ ক্লিক করে বড় করে দেখানো
-    // ============================================
+    // Image Zoom
     document.querySelectorAll('.img-thumb').forEach(img => {
         img.addEventListener('click', function () {
             window.open(this.src, '_blank');
         });
     });
+
+    // Escape HTML helper
+    function escapeHtml(text) {
+        if (!text) return '';
+        const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
+        return String(text).replace(/[&<>"']/g, m => map[m]);
+    }
+
+    // Open Safe Chat Modal
+    async function openSafeChatModal(orderId, sellerId, sellerName) {
+        document.getElementById('currentChatOrderId').value = orderId;
+        document.getElementById('currentChatSellerId').value = sellerId;
+        document.getElementById('chatSellerName').textContent = sellerName || 'Verified Supplier';
+        document.getElementById('chatOrderRef').textContent = 'Order #' + orderId;
+        document.getElementById('chatMessageInput').value = '';
+        document.getElementById('chatFilterWarning').style.display = 'none';
+        document.getElementById('chatSendBtn').disabled = false;
+        document.getElementById('safeChatModal').style.display = 'flex';
+
+        await loadChatMessages(orderId, sellerId);
+    }
+
+    function closeSafeChatModal() {
+        document.getElementById('safeChatModal').style.display = 'none';
+    }
+
+    // Client-side anti-disintermediation check
+    function handleChatInputCheck(textarea) {
+        const val = textarea.value;
+        const warningEl = document.getElementById('chatFilterWarning');
+        const warningText = document.getElementById('chatFilterWarningText');
+        const sendBtn = document.getElementById('chatSendBtn');
+
+        const emailRegex = /([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})|(\b[a-zA-Z0-9._%+-]+\s*(at|@|\[at\]|\(at\))\s*[a-zA-Z0-9.-]+\s*(dot|\.|\(dot\)|\bcom\b|\bnet\b))/i;
+
+        const bengaliDigits = {'০':'0','১':'1','২':'2','৩':'3','৪':'4','৫':'5','৬':'6','৭':'7','৮':'8','৯':'9'};
+        const normalized = val.replace(/[০-৯]/g, d => bengaliDigits[d]);
+        const digitsOnly = normalized.replace(/\D/g, '');
+
+        const hasPhone = /(^|01|8801|\+8801)[3-9]\d{8}/.test(digitsOnly) || (digitsOnly.length >= 10 && /(01[3-9]\d{8})/.test(digitsOnly));
+        const hasEmail = emailRegex.test(val);
+        const hasSocialOrOffsite = /\b(whatsapp|wa\.me|imo|telegram|viber|skype|call\s*me|phone\s*me|my\s*number|bkash|nagad|rocket|meet\s*me|deal\s*outside|যোগাযোগ|ফোন|নাম্বার|কল\s*দিন)\b/i.test(normalized);
+
+        if (hasEmail || hasPhone || hasSocialOrOffsite) {
+            warningEl.style.display = 'flex';
+            warningText.textContent = hasEmail 
+                ? '⚠️ Sharing email addresses is not allowed for security reasons.'
+                : (hasPhone 
+                    ? '⚠️ Direct phone numbers cannot be shared. Please keep messages on PackBang.'
+                    : '⚠️ External contacts (WhatsApp, Imo, bKash, offline deals) are strictly prohibited.');
+            sendBtn.disabled = true;
+        } else {
+            warningEl.style.display = 'none';
+            sendBtn.disabled = false;
+        }
+    }
+
+    // Load Chat Messages
+    async function loadChatMessages(orderId, sellerId) {
+        const container = document.getElementById('chatMessagesContainer');
+        try {
+            const res = await fetch('/api/custom-order/' + encodeURIComponent(orderId) + '/messages?sellerId=' + encodeURIComponent(sellerId));
+            const data = await res.json();
+            if (data.success) {
+                renderChatMessages(data.messages || []);
+            } else {
+                container.innerHTML = '<div class="chat-error">' + escapeHtml(data.message || 'Error loading messages') + '</div>';
+            }
+        } catch (err) {
+            container.innerHTML = '<div class="chat-error">Network error. Please try again.</div>';
+        }
+    }
+
+    function renderChatMessages(messages) {
+        const container = document.getElementById('chatMessagesContainer');
+        if (!messages || messages.length === 0) {
+            container.innerHTML = '<div class="chat-empty-thread"><i class="fas fa-comments"></i><p>No messages yet. Ask the supplier about paper GSM, fluting, sample delivery, and finishing!</p></div>';
+            return;
+        }
+
+        container.innerHTML = messages.map(msg => {
+            const isMe = msg.senderRole === 'customer';
+            const isSystem = msg.senderId === 'SYSTEM';
+
+            if (isSystem) {
+                return '<div class="chat-bubble-system"><i class="fas fa-info-circle"></i> ' + escapeHtml(msg.text) + ' <span class="msg-time">' + new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + '</span></div>';
+            }
+
+            return '<div class="chat-bubble-row ' + (isMe ? 'msg-outgoing' : 'msg-incoming') + '">' +
+                   '<div class="chat-bubble">' +
+                   '<div class="msg-sender-name">' + escapeHtml(msg.senderName) + '</div>' +
+                   '<div class="msg-body">' + escapeHtml(msg.text) + '</div>' +
+                   '<div class="msg-time">' + new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + '</div>' +
+                   '</div></div>';
+        }).join('');
+
+        container.scrollTop = container.scrollHeight;
+    }
+
+    // Send Message
+    async function sendSafeMessage(e) {
+        e.preventDefault();
+        const orderId = document.getElementById('currentChatOrderId').value;
+        const sellerId = document.getElementById('currentChatSellerId').value;
+        const input = document.getElementById('chatMessageInput');
+        const text = input.value.trim();
+        if (!text) return;
+
+        const sendBtn = document.getElementById('chatSendBtn');
+        sendBtn.disabled = true;
+        sendBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+
+        try {
+            const res = await fetch('/api/custom-order/' + encodeURIComponent(orderId) + '/message', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ sellerId, text })
+            });
+            const data = await res.json();
+            if (data.success) {
+                input.value = '';
+                document.getElementById('chatFilterWarning').style.display = 'none';
+                await loadChatMessages(orderId, sellerId);
+            } else {
+                alert(data.message || 'Message blocked or failed to send');
+            }
+        } catch (err) {
+            alert('Failed to send message. Please check connection.');
+        } finally {
+            sendBtn.disabled = false;
+            sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Send';
+        }
+    }
+
+    // Decide Bid (Accept / Reject)
+    async function decideBid(orderId, bidId, action) {
+        const confirmMsg = action === 'accept' 
+            ? 'Are you sure you want to accept this factory quotation? This will assign the order and reject competing bids.' 
+            : 'Are you sure you want to decline this quote?';
+
+        if (!confirm(confirmMsg)) return;
+
+        try {
+            const res = await fetch('/api/custom-order/' + encodeURIComponent(orderId) + '/bid/' + encodeURIComponent(bidId) + '/decision', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action })
+            });
+            const data = await res.json();
+            if (data.success) {
+                alert(action === 'accept' ? '🎉 Quotation accepted successfully! Supplier assigned.' : 'Quote declined.');
+                window.location.reload();
+            } else {
+                alert(data.message || 'Operation failed');
+            }
+        } catch (err) {
+            alert('Network error. Please try again.');
+        }
+    }
 </script>
 
 <%- include('partials/footer') %>

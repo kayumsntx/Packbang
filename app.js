@@ -1230,6 +1230,68 @@ const customOrderSchema = new mongoose.Schema({
     updatedAt: { type: Date, default: Date.now }
 });
 const CustomOrder = mongoose.model("CustomOrder", customOrderSchema);
+// ==========================================
+// ANTI-DISINTERMEDIATION MESSAGE FILTER (FIVERR/UPWORK STYLE)
+// Strictly blocks personal phone numbers, emails, external chat, and off-site deals
+// ==========================================
+function validateDisintermediation(rawText) {
+    if (!rawText || typeof rawText !== 'string' || !rawText.trim()) {
+        return { allowed: false, reason: "Message text cannot be empty." };
+    }
+    const text = rawText.trim();
+
+    // 1. Email detection (standard & obfuscated like name at gmail dot com)
+    const emailRegex = /([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+.[a-zA-Z]{2,})|(\b[a-zA-Z0-9._%+-]+\s*(at|@|\[at\]|\(at\))\s*[a-zA-Z0-9.-]+\s*(dot|\.|\(dot\)|\bcom\b|\bnet\b))/i;
+    if (emailRegex.test(text)) {
+        return {
+            allowed: false,
+            reason: "Sharing email addresses is strictly prohibited to protect your transactions and warranty on PackBang."
+        };
+    }
+
+    // 2. Phone number detection (converts Bengali numerals to English digits)
+    const bengaliDigits = {'০':'0','১':'1','২':'2','৩':'3','৪':'4','৫':'5','৬':'6','৭':'7','৮':'8','৯':'9'};
+    const normalized = text.replace(/[০-৯]/g, d => bengaliDigits[d]);
+    const digitsOnly = normalized.replace(/\D/g, '');
+
+    // Bangladeshi phone check: 11-digit starting with 013-019 or +8801...
+    if (/(^|01|8801|\+8801)[3-9]\d{8}/.test(digitsOnly) || (digitsOnly.length >= 10 && /(01[3-9]\d{8})/.test(digitsOnly))) {
+        return {
+            allowed: false,
+            reason: "Sharing direct mobile or phone numbers is not permitted. Please communicate exclusively through PackBang chat."
+        };
+    }
+
+    // Spelled-out numbers (English & phonetic)
+    const spelledOutRegex = /\b(zero|one|two|three|four|five|six|seven|eight|nine|shunno|ek|dui|tin|char|pach|choy|shat|aat|noy)\s+(one|seven|eight|nine|three|four|five|six)\b/i;
+    if (spelledOutRegex.test(normalized)) {
+        return {
+            allowed: false,
+            reason: "Phone numbers cannot be shared using spelled-out words."
+        };
+    }
+
+    // 3. Social media, external messaging & off-platform payment attempts
+    const restrictedPatterns = [
+        { regex: /\b(whatsapp|what's\s*app|whatapp|wa\.me|imo|telegram|viber|skype|wechat)\b/i, label: "external chat applications (WhatsApp, Imo, Telegram, etc.)" },
+        { regex: /\b(facebook|fb\.com|instagram|insta|linkedin|youtube)\b/i, label: "social media links" },
+        { regex: /\b(call\s*me|phone\s*me|contact\s*me\s*at|ring\s*me|reach\s*me\s*at|my\s*number)\b/i, label: "direct contact requests" },
+        { regex: /\b(bkash|b-kash|nagad|rocket|upay|bank\s*transfer|cash\s*outside|offline\s*payment)\b/i, label: "offline payment or external money transfers" },
+        { regex: /\b(personal\s*address|shop\s*address|meet\s*me\s*at|deal\s*outside|direct\s*deal)\b/i, label: "outside deals or personal meetups" }
+    ];
+
+    for (const item of restrictedPatterns) {
+        if (item.regex.test(normalized)) {
+            return {
+                allowed: false,
+                reason: `Sharing ${item.label} is prohibited by platform safety policies.`
+            };
+        }
+    }
+
+    return { allowed: true };
+}
+
 
 
 // ==========================================
