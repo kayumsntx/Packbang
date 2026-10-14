@@ -305,37 +305,106 @@
     }
 
 
+    /* Screen view when opened in print/slip mode */
+    body.is-slip-mode .main-navbar,
+    body.is-slip-mode .top-strip,
+    body.is-slip-mode .top-strip-items,
+    body.is-slip-mode footer,
+    body.is-slip-mode footer.bagnest-footer,
+    body.is-slip-mode .footer-container {
+        display: none !important;
+    }
+    body.is-slip-mode .slip-page {
+        margin: 20px auto;
+    }
+
+    /* Print view: hide entire website header and website footer */
     @media print {
+        @page {
+            size: A4 portrait;
+            margin: 10mm;
+        }
+
+        /* Hide entire website chrome: navbar, top bar, header, website footer, action buttons, notifications */
+        header,
+        footer,
+        footer.bagnest-footer,
+        .bagnest-footer,
+        .footer-container,
+        .footer-col,
+        .footer-bottom,
         .main-navbar,
         .main-footer,
+        .top-strip,
+        .top-strip-items,
+        .top-strip-item,
         .action-buttons,
+        .btn-print,
+        .btn-download,
+        .btn-back,
+        .btn,
         #notificationContainer,
-        .guest-cart-banner {
+        .guest-cart-banner,
+        .mobile-bottom-nav,
+        .floating-whatsapp,
+        .chat-widget,
+        iframe {
             display: none !important;
+            visibility: hidden !important;
+            height: 0 !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            overflow: hidden !important;
+        }
+
+        /* Ensure slip-container and its internal slip-footer print properly */
+        .slip-container .slip-footer {
+            display: flex !important;
+            visibility: visible !important;
+            height: auto !important;
+            margin-top: 24px !important;
+            padding-top: 16px !important;
+        }
+
+        html, body {
+            background: #ffffff !important;
+            color: #000000 !important;
+            width: 100% !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            box-shadow: none !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
         }
 
         .slip-page {
-            margin: 0;
-            padding: 0;
+            margin: 0 !important;
+            padding: 0 !important;
+            max-width: 100% !important;
+            width: 100% !important;
+            display: block !important;
         }
 
         .slip-container {
-            border: none;
-            box-shadow: none;
-            padding: 30px;
-            border-radius: 0;
+            border: 1px solid #d1d5db !important;
+            box-shadow: none !important;
+            padding: 16px 20px !important;
+            border-radius: 6px !important;
+            width: 100% !important;
+            max-width: 100% !important;
+            page-break-inside: avoid;
         }
 
         .slip-header .slip-type .status-badge {
-            border: 1px solid #e2e8f0;
+            border: 1px solid #9ca3af !important;
         }
 
         .slip-footer .signature .sig-line {
-            border-top: 1px solid #000;
+            border-top: 1px solid #000000 !important;
         }
 
         .qr-section {
-            border: 1px dashed #000 !important;
+            border: 1px dashed #000000 !important;
             background: #f9fafb !important;
         }
     }
@@ -584,6 +653,7 @@
     $(document).ready(function() {
         const urlParams = new URLSearchParams(window.location.search);
         if (urlParams.has('print') && urlParams.get('print') === 'true') {
+            document.body.classList.add('is-slip-mode');
             setTimeout(function() {
                 window.print();
             }, 500);
