@@ -1226,6 +1226,14 @@ const customOrderSchema = new mongoose.Schema({
         createdAt: { type: Date, default: Date.now }
     }],
     selectedBidId: { type: String, default: null },
+    messages: [{
+        senderId: { type: String, required: true },
+        senderName: { type: String, required: true },
+        senderRole: { type: String, enum: ['customer', 'seller', 'admin'], default: 'customer' },
+        sellerId: { type: String },
+        text: { type: String, required: true },
+        createdAt: { type: Date, default: Date.now }
+    }],
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now }
 });
@@ -1502,25 +1510,43 @@ app.post("/api/custom-order/:id/bid", requireSellerOrAdmin, async (req, res) => 
     }
 });
 
-// ---------- ADMIN: ACCEPT/REJECT BID ----------
-app.put("/api/admin/custom-order/:orderId/bid/:bidId", requireAdmin, async (req, res) => {
+// ---------- CUSTOMER / ADMIN: ACCEPT/REJECT BID ----------
+app.put(["/api/custom-order/:orderId/bid/:bidId", "/api/admin/custom-order/:orderId/bid/:bidId"], requireAuth, async (req, res) => {
     const { action } = req.body; // 'accept' or 'reject'
+    const user = req.session.user;
     
     try {
         const order = await CustomOrder.findOne({ id: req.params.orderId });
         if (!order) return res.status(404).json({ success: false, message: "Order not found" });
         
+        // Permission check: customer who placed the order OR admin
+        const isOwner = order.customerId === user.id;
+        const isAdmin = user.role === 'admin' || user.role === 'superadmin' || user.isSuperAdmin;
+        
+        if (!isOwner && !isAdmin) {
+            return res.status(403).json({ success: false, message: "Only the customer who created this order or an administrator can accept or reject bids." });
+        }
+        
         const bidIndex = order.bids.findIndex(b => b._id.toString() === req.params.bidId);
         if (bidIndex === -1) return res.status(404).json({ success: false, message: "Bid not found" });
         
         if (action === 'accept') {
-            // Reject all other bids
             order.bids.forEach((b, idx) => {
                 if (idx !== bidIndex) b.status = 'rejected';
             });
             order.bids[bidIndex].status = 'accepted';
             order.status = 'assigned';
             order.selectedBidId = order.bids[bidIndex]._id;
+
+            if (!order.messages) order.messages = [];
+            order.messages.push({
+                senderId: 'SYSTEM',
+                senderName: 'PackBang Safe System',
+                senderRole: 'admin',
+                sellerId: order.bids[bidIndex].sellerId,
+                text: "Quotation accepted for BDT. " + order.bids[bidIndex].amount + " by customer. Supplier assigned for production.",
+                createdAt: new Date()
+            });
         } else if (action === 'reject') {
             order.bids[bidIndex].status = 'rejected';
         } else {
@@ -1530,7 +1556,133 @@ app.put("/api/admin/custom-order/:orderId/bid/:bidId", requireAdmin, async (req,
         order.updatedAt = new Date();
         await order.save();
         
-        res.json({ success: true, message: `Bid ${action}ed successfully`, order });
+        res.json({ success: true, message: "Bid " + action + "ed successfully", order });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
+
+// Alias POST for decision
+app.post("/api/custom-order/:orderId/bid/:bidId/decision", requireAuth, async (req, res) => {
+    req.url = "/api/custom-order/" + req.params.orderId + "/bid/" + req.params.bidId;
+    req.method = 'PUT';
+    app._router.handle(req, res);
+});
+
+// ---------- CHAT / MESSAGING ENDPOINTS (STORE USER) ----------
+app.get("/api/custom-order/:id/messages", requireAuth, async (req, res) => {
+    try {
+        const order = await CustomOrder.findOne({ id: req.params.id });
+        if (!order) return res.status(404).json({ success: false, message: "Order not found" });
+
+        const user = req.session.user;
+        const isOwner = order.customerId === user.id;
+        const isAdmin = user.role === 'admin' || user.role === 'superadmin' || user.isSuperAdmin;
+        const isSeller = user.role === 'seller';
+
+        if (!isOwner && !isAdmin && !isSeller) {
+            return res.status(403).json({ success: false, message: "Access denied" });
+        }
+
+        const sellerId = req.query.sellerId;
+        let messages = order.messages || [];
+        if (sellerId) {
+            messages = messages.filter(m => m.sellerId === sellerId);
+        }
+
+        res.json({ success: true, messages });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
+
+app.post("/api/custom-order/:id/message", requireAuth, async (req, res) => {
+    const { sellerId, text } = req.body;
+    const user = req.session.user;
+
+    const validation = validateDisintermediation(text);
+    if (!validation.allowed) {
+        return res.status(400).json({ success: false, blocked: true, message: validation.reason });
+    }
+
+    try {
+        const order = await CustomOrder.findOne({ id: req.params.id });
+        if (!order) return res.status(404).json({ success: false, message: "Order not found" });
+
+        const isOwner = order.customerId === user.id;
+        const isAdmin = user.role === 'admin' || user.role === 'superadmin';
+        const isSeller = user.role === 'seller';
+
+        if (!isOwner && !isAdmin && !isSeller) {
+            return res.status(403).json({ success: false, message: "Access denied" });
+        }
+
+        const targetSellerId = sellerId || (isSeller ? user.id : (order.bids[0]?.sellerId || 'general'));
+        const newMsg = {
+            senderId: user.id,
+            senderName: user.profile?.name || user.username || (isOwner ? 'Buyer' : 'Supplier'),
+            senderRole: isOwner ? 'customer' : (isAdmin ? 'admin' : 'seller'),
+            sellerId: targetSellerId,
+            text: text.trim(),
+            createdAt: new Date()
+        };
+
+        if (!order.messages) order.messages = [];
+        order.messages.push(newMsg);
+        order.updatedAt = new Date();
+        await order.save();
+
+        res.json({ success: true, message: "Message sent successfully", chatMessage: newMsg });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
+
+// ---------- PUBLIC MESSAGING ENDPOINTS (FOR seller.packbang.com) ----------
+app.get("/api/public/custom-order/:id/messages", async (req, res) => {
+    try {
+        const order = await CustomOrder.findOne({ id: req.params.id });
+        if (!order) return res.status(404).json({ success: false, message: "Order not found" });
+
+        const sellerId = req.query.sellerId;
+        let messages = order.messages || [];
+        if (sellerId) {
+            messages = messages.filter(m => m.sellerId === sellerId);
+        }
+
+        res.json({ success: true, messages });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
+
+app.post("/api/public/custom-order/:id/message", async (req, res) => {
+    const { sellerId, sellerName, text } = req.body;
+
+    const validation = validateDisintermediation(text);
+    if (!validation.allowed) {
+        return res.status(400).json({ success: false, blocked: true, message: validation.reason });
+    }
+
+    try {
+        const order = await CustomOrder.findOne({ id: req.params.id });
+        if (!order) return res.status(404).json({ success: false, message: "Order not found" });
+
+        const newMsg = {
+            senderId: sellerId || 'SELLER-PUBLIC',
+            senderName: sellerName || 'Packaging Supplier',
+            senderRole: 'seller',
+            sellerId: sellerId,
+            text: text.trim(),
+            createdAt: new Date()
+        };
+
+        if (!order.messages) order.messages = [];
+        order.messages.push(newMsg);
+        order.updatedAt = new Date();
+        await order.save();
+
+        res.json({ success: true, message: "Message sent successfully", chatMessage: newMsg });
     } catch (err) {
         res.status(500).json({ success: false, message: err.message });
     }
