@@ -1239,7 +1239,7 @@ const customOrderSchema = new mongoose.Schema({
 });
 const CustomOrder = mongoose.model("CustomOrder", customOrderSchema);
 // ==========================================
-// ANTI-DISINTERMEDIATION MESSAGE FILTER (FIVERR/UPWORK STYLE)
+// ANTI-DISINTERMEDIATION MESSAGE FILTER (SECURE IN-APP MESSAGING)
 // Strictly blocks personal phone numbers, emails, external chat, and off-site deals
 // ==========================================
 function validateDisintermediation(rawText) {

@@ -9,7 +9,7 @@
     .page-header h2 i { color: #f39c12; }
     .page-header .order-count { background: #edf2f7; color: #4a5568; padding: 6px 16px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; }
 
-    /* ===== ORDER CARD (TruckLagbe Style) ===== */
+    /* ===== ORDER CARD (Direct Bidding Style) ===== */
     .order-card { background: white; border-radius: 14px; border: 1px solid #e2e8f0; padding: 22px 26px; margin-bottom: 24px; transition: all 0.3s ease; position: relative; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.03); }
     .order-card:hover { box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08); border-color: #f39c12; transform: translateY(-2px); }
     .order-card::before { content: ''; position: absolute; top: 0; left: 0; width: 5px; height: 100%; background: #e2e8f0; transition: background 0.3s ease; }
@@ -63,12 +63,12 @@
     .empty-state .btn-shop { display: inline-block; margin-top: 16px; padding: 12px 32px; background: linear-gradient(45deg, #f39c12, #e67e22); color: white; border-radius: 10px; text-decoration: none; font-weight: 700; transition: all 0.3s ease; }
     .empty-state .btn-shop:hover { transform: translateY(-2px); box-shadow: 0 6px 25px rgba(243, 156, 18, 0.4); }
 
-    /* ===== TRUCK LAGBE STYLE BIDDING UI ===== */
-    .trucklagbe-bids-container { margin-top: 20px; padding-top: 18px; border-top: 2px dashed #e2e8f0; }
+    /* ===== FACTORY DIRECT BIDDING UI ===== */
+    .factory-bids-container { margin-top: 20px; padding-top: 18px; border-top: 2px dashed #e2e8f0; }
     .bids-section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 8px; }
     .bids-section-header h4 { margin: 0; font-size: 1.05rem; font-weight: 800; color: #1e293b; display: flex; align-items: center; gap: 8px; }
-    .pulse-indicator { width: 10px; height: 10px; background: #10b981; border-radius: 50%; box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); animation: tlPulse 1.8s infinite; }
-    @keyframes tlPulse { 0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); } 70% { transform: scale(1); box-shadow: 0 0 0 7px rgba(16, 185, 129, 0); } 100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); } }
+    .pulse-indicator { width: 10px; height: 10px; background: #10b981; border-radius: 50%; box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); animation: radarPulse 1.8s infinite; }
+    @keyframes radarPulse { 0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); } 70% { transform: scale(1); box-shadow: 0 0 0 7px rgba(16, 185, 129, 0); } 100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); } }
     .bids-badge-sub { font-size: 0.75rem; background: #fef3c7; color: #92400e; font-weight: 700; padding: 3px 10px; border-radius: 20px; border: 1px solid #fde68a; }
 
     .bids-waiting-box { background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 12px; padding: 18px; display: flex; align-items: center; gap: 14px; color: #64748b; }
@@ -77,10 +77,10 @@
     .bids-waiting-box p { margin: 0; font-size: 0.85rem; }
 
     .bids-cards-grid { display: flex; flex-direction: column; gap: 12px; }
-    .bid-card-tl { background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 12px; padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; gap: 18px; flex-wrap: wrap; transition: all 0.25s ease; position: relative; box-shadow: 0 2px 6px rgba(0,0,0,0.03); }
-    .bid-card-tl:hover { border-color: #f59e0b; box-shadow: 0 8px 24px rgba(245, 158, 11, 0.12); transform: translateY(-1px); }
-    .bid-card-tl.is-accepted { border-color: #10b981; background: #f0fdf4; }
-    .bid-card-tl.is-rejected { border-color: #fca5a5; opacity: 0.65; background: #fff5f5; }
+    .bid-card-item { background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 12px; padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; gap: 18px; flex-wrap: wrap; transition: all 0.25s ease; position: relative; box-shadow: 0 2px 6px rgba(0,0,0,0.03); }
+    .bid-card-item:hover { border-color: #f59e0b; box-shadow: 0 8px 24px rgba(245, 158, 11, 0.12); transform: translateY(-1px); }
+    .bid-card-item.is-accepted { border-color: #10b981; background: #f0fdf4; }
+    .bid-card-item.is-rejected { border-color: #fca5a5; opacity: 0.65; background: #fff5f5; }
 
     .bid-seller-info { display: flex; align-items: flex-start; gap: 14px; flex: 1 1 300px; min-width: 260px; }
     .seller-avatar { width: 44px; height: 44px; background: linear-gradient(135deg, #eff6ff, #dbeafe); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; color: #2563eb; position: relative; flex-shrink: 0; border: 1px solid #bfdbfe; }
@@ -101,20 +101,20 @@
     .bid-pricing-box .total-est { font-size: 0.8rem; color: #059669; font-weight: 700; margin-top: 3px; }
 
     .bid-actions-box { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-    .btn-group-tl { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-    .btn-tl-chat { background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; padding: 8px 14px; border-radius: 8px; font-size: 0.82rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s; }
-    .btn-tl-chat:hover { background: #dbeafe; transform: translateY(-1px); }
-    .btn-tl-accept { background: #10b981; color: white; border: none; padding: 8px 16px; border-radius: 8px; font-size: 0.82rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s; box-shadow: 0 2px 6px rgba(16, 185, 129, 0.3); }
-    .btn-tl-accept:hover { background: #059669; transform: translateY(-1px); }
-    .btn-tl-reject { background: #fff; color: #dc2626; border: 1px solid #fecaca; padding: 8px 12px; border-radius: 8px; font-size: 0.82rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; transition: all 0.2s; }
-    .btn-tl-reject:hover { background: #fef2f2; }
+    .btn-group-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .btn-bid-chat { background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; padding: 8px 14px; border-radius: 8px; font-size: 0.82rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s; }
+    .btn-bid-chat:hover { background: #dbeafe; transform: translateY(-1px); }
+    .btn-bid-accept { background: #10b981; color: white; border: none; padding: 8px 16px; border-radius: 8px; font-size: 0.82rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s; box-shadow: 0 2px 6px rgba(16, 185, 129, 0.3); }
+    .btn-bid-accept:hover { background: #059669; transform: translateY(-1px); }
+    .btn-bid-reject { background: #fff; color: #dc2626; border: 1px solid #fecaca; padding: 8px 12px; border-radius: 8px; font-size: 0.82rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; transition: all 0.2s; }
+    .btn-bid-reject:hover { background: #fef2f2; }
 
     .bid-status-pill { font-size: 0.78rem; font-weight: 800; padding: 4px 12px; border-radius: 20px; display: inline-flex; align-items: center; gap: 5px; text-transform: uppercase; letter-spacing: 0.3px; }
     .accepted-pill { background: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; }
     .rejected-pill { background: #fee2e2; color: #991b1b; }
     .pending-pill { background: #fef3c7; color: #92400e; }
 
-    /* ===== SAFE CHAT MODAL (FIVERR/UPWORK STYLE) ===== */
+    /* ===== SAFE CHAT MODAL (SECURE IN-APP MESSAGING) ===== */
     .safe-chat-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 99999; display: flex; align-items: center; justify-content: center; padding: 16px; }
     .chat-modal-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.65); backdrop-filter: blur(4px); }
     .chat-modal-content { position: relative; width: 100%; max-width: 580px; background: #ffffff; border-radius: 16px; box-shadow: 0 25px 60px rgba(0,0,0,0.25); display: flex; flex-direction: column; max-height: 90vh; overflow: hidden; animation: chatPop 0.25s ease-out; }
@@ -167,7 +167,7 @@
         .order-card .order-header { flex-direction: column; align-items: flex-start; }
         .order-card .order-meta { flex-direction: column; gap: 6px; }
         .order-images .img-thumb { width: 60px; height: 60px; }
-        .bid-card-tl { flex-direction: column; align-items: flex-start; }
+        .bid-card-item { flex-direction: column; align-items: flex-start; }
         .bid-pricing-box { text-align: left; }
         .timer-badge { width: 100%; justify-content: center; }
     }
@@ -177,8 +177,8 @@
         .order-card .order-title { font-size: 1rem; }
         .order-card .order-description { font-size: 0.82rem; padding: 10px 12px; }
         .order-images .img-thumb { width: 50px; height: 50px; }
-        .btn-group-tl { width: 100%; }
-        .btn-group-tl button { flex: 1; justify-content: center; }
+        .btn-group-actions { width: 100%; }
+        .btn-group-actions button { flex: 1; justify-content: center; }
     }
 </style>
 
@@ -201,7 +201,7 @@
                         </h3>
                     </div>
                     <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
-                        <!-- Countdown Timer (TruckLagbe Style) -->
+                        <!-- Countdown Timer (Direct Bidding Style) -->
                         <span class="timer-badge" 
                               data-created-at="<%= new Date(order.createdAt).getTime() %>" 
                               data-order-status="<%= order.status %>">
@@ -247,9 +247,9 @@
                     <div class="admin-note"><strong><i class="fas fa-user-shield"></i> Admin Note:</strong> <%= order.adminNotes %></div>
                 <% } %>
 
-                <!-- ===== TRUCK LAGBE STYLE LIVE SUPPLIER BIDS SECTION ===== -->
+                <!-- ===== LIVE SUPPLIER BIDS SECTION ===== -->
                 <% if (order.status === 'approved' || order.status === 'assigned' || order.status === 'completed') { %>
-                    <div class="trucklagbe-bids-container">
+                    <div class="factory-bids-container">
                         <div class="bids-section-header">
                             <h4>
                                 <span class="pulse-indicator"></span>
@@ -269,7 +269,7 @@
                         <% } else { %>
                             <div class="bids-cards-grid">
                                 <% order.bids.forEach(bid => { %>
-                                    <div class="bid-card-tl <%= bid.status === 'accepted' ? 'is-accepted' : (bid.status === 'rejected' ? 'is-rejected' : 'is-pending') %>" id="bid-card-<%= bid._id %>">
+                                    <div class="bid-card-item <%= bid.status === 'accepted' ? 'is-accepted' : (bid.status === 'rejected' ? 'is-rejected' : 'is-pending') %>" id="bid-card-<%= bid._id %>">
                                         <!-- Left: Supplier Brand & Verified Info -->
                                         <div class="bid-seller-info">
                                             <div class="seller-avatar">
@@ -308,26 +308,26 @@
                                         <div class="bid-actions-box">
                                             <% if (bid.status === 'accepted') { %>
                                                 <div class="bid-status-pill accepted-pill"><i class="fas fa-check-circle"></i> Assigned Supplier</div>
-                                                <button type="button" class="btn-tl-chat" onclick="openSafeChatModal('<%= order.id %>', '<%= bid.sellerId %>', '<%= bid.sellerName %>')">
+                                                <button type="button" class="btn-bid-chat" onclick="openSafeChatModal('<%= order.id %>', '<%= bid.sellerId %>', '<%= bid.sellerName %>')">
                                                     <i class="fas fa-comments"></i> Send Message
                                                 </button>
                                             <% } else if (bid.status === 'rejected') { %>
                                                 <div class="bid-status-pill rejected-pill"><i class="fas fa-times-circle"></i> Declined</div>
                                             <% } else if (order.status === 'approved') { %>
-                                                <div class="btn-group-tl">
-                                                    <button type="button" class="btn-tl-chat" onclick="openSafeChatModal('<%= order.id %>', '<%= bid.sellerId %>', '<%= bid.sellerName %>')">
+                                                <div class="btn-group-actions">
+                                                    <button type="button" class="btn-bid-chat" onclick="openSafeChatModal('<%= order.id %>', '<%= bid.sellerId %>', '<%= bid.sellerName %>')">
                                                         <i class="fas fa-comments"></i> Send Message
                                                     </button>
-                                                    <button type="button" class="btn-tl-accept" onclick="decideBid('<%= order.id %>', '<%= bid._id %>', 'accept')">
+                                                    <button type="button" class="btn-bid-accept" onclick="decideBid('<%= order.id %>', '<%= bid._id %>', 'accept')">
                                                         <i class="fas fa-check"></i> Accept Quote
                                                     </button>
-                                                    <button type="button" class="btn-tl-reject" onclick="decideBid('<%= order.id %>', '<%= bid._id %>', 'reject')">
+                                                    <button type="button" class="btn-bid-reject" onclick="decideBid('<%= order.id %>', '<%= bid._id %>', 'reject')">
                                                         <i class="fas fa-times"></i> Decline
                                                     </button>
                                                 </div>
                                             <% } else { %>
                                                 <div class="bid-status-pill pending-pill">Pending</div>
-                                                <button type="button" class="btn-tl-chat" onclick="openSafeChatModal('<%= order.id %>', '<%= bid.sellerId %>', '<%= bid.sellerName %>')">
+                                                <button type="button" class="btn-bid-chat" onclick="openSafeChatModal('<%= order.id %>', '<%= bid.sellerId %>', '<%= bid.sellerName %>')">
                                                     <i class="fas fa-comments"></i> Send Message
                                                 </button>
                                             <% } %>
@@ -367,7 +367,7 @@
     <% } %>
 </div>
 
-<!-- ===== SAFE CHAT MODAL (FIVERR/UPWORK STYLE ANTI-DISINTERMEDIATION) ===== -->
+<!-- ===== SAFE CHAT MODAL (SECURE ESCROW CHAT & PRIVACY PROTECTION) ===== -->
 <div id="safeChatModal" class="safe-chat-modal" style="display: none;">
     <div class="chat-modal-overlay" onclick="closeSafeChatModal()"></div>
     <div class="chat-modal-content">
