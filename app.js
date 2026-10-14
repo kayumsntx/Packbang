@@ -4,6 +4,7 @@
 require('dotenv').config();
 
 const express = require("express");
+const cors = require("cors");
 const multer = require("multer");
 const cloudinary = require('cloudinary').v2;
 const { CloudinaryStorage } = require('multer-storage-cloudinary');
@@ -288,6 +289,18 @@ app.set("views", path.join(__dirname, "views"));
 app.use("/testimg", express.static(path.join(__dirname, "testimg")));
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
+app.use(cors({
+    origin: function (origin, callback) {
+        if (!origin) return callback(null, true);
+        const isAllowed =
+            origin.includes('localhost') ||
+            origin.includes('127.0.0.1') ||
+            /^https?:\/\/([a-z0-9-]+\.)?packbang\.com$/i.test(origin) ||
+            /^https?:\/\/.*\.onrender\.com$/i.test(origin);
+        callback(null, true);
+    },
+    credentials: true
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
@@ -1222,11 +1235,11 @@ const CustomOrder = mongoose.model("CustomOrder", customOrderSchema);
 // ==========================================
 // CUSTOM ORDER - CREATE PAGE (Customer)
 // ==========================================
-app.get("/my-custom-orders", requireAuth, (req, res) => {
-    res.render("custom-order", {
-        user: req.session.user,
-        isGuest: false
-    });
+// ==========================================
+// CUSTOM ORDER - REDIRECT TO MAKE CUSTOM ORDER
+// ==========================================
+app.get("/custom-order", (req, res) => {
+    res.redirect("/custom-orders");
 });
 // ==========================================
 // CUSTOM ORDER ROUTES
@@ -1285,7 +1298,41 @@ app.post("/api/custom-order/create", requireAuth, uploadOrderImages, async (req,
 });
 
 // ---------- GET ALL CUSTOM ORDERS (Admin/Seller) ----------
-app.get("/api/my-custom-orders", requireAuth, async (req, res) => {
+// ---------- PUBLIC API: APPROVED CUSTOM ORDERS ----------
+app.get("/api/public/approved-custom-orders", async (req, res) => {
+    try {
+        const orders = await CustomOrder.find({ status: 'approved' }).sort({ createdAt: -1 });
+        res.json({ success: true, orders });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
+
+app.post("/api/public/custom-order/:id/bid", async (req, res) => {
+    const { sellerId, sellerName, amount, deliveryTime, note } = req.body;
+    try {
+        const order = await CustomOrder.findOne({ id: req.params.id });
+        if (!order) return res.status(404).json({ success: false, message: "Order not found" });
+        if (order.status !== 'approved') return res.status(400).json({ success: false, message: "Order is not open for bidding" });
+        const bid = {
+            sellerId: sellerId || ('SELLER-' + Date.now()),
+            sellerName: sellerName || 'Verified Packaging Supplier',
+            amount: parseFloat(amount),
+            deliveryTime: deliveryTime || '3-5 Days',
+            note: note || '',
+            status: 'pending',
+            createdAt: new Date()
+        };
+        order.bids.push(bid);
+        order.updatedAt = new Date();
+        await order.save();
+        res.json({ success: true, message: "Bid placed successfully", bid, order });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
+
+app.get(["/api/custom-orders", "/api/my-custom-orders"], requireAuth, async (req, res) => {
     try {
         const user = req.session.user;
         let filter = {};
