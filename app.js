@@ -1835,28 +1835,29 @@ app.post("/api/custom-order/:orderId/pay", requireAuth, async (req, res) => {
             return res.status(403).json({ success: false, message: "Only the customer can make payment for this order." });
         }
 
-        // Must be in assigned state and unpaid
-        if (!order.assignedSellerId) {
-            return res.status(400).json({ success: false, message: "Please accept a supplier's quote to assign a seller before payment." });
-        }
-
         if (order.paymentStatus === 'paid_to_admin') {
             return res.status(400).json({ success: false, message: "Payment has already been deposited to Admin Escrow for this order." });
         }
 
-        // Calculate total amount
-        const acceptedBid = order.bids.find(b => b.status === 'accepted' || b._id.toString() === order.selectedBidId);
-        let amount = order.agreedPrice;
+        // Smart seller assignment: if not explicitly assigned, check accepted bid or first available quote
+        const acceptedBid = order.bids.find(b => b.status === 'accepted' || b._id.toString() === order.selectedBidId) || (order.bids.length > 0 ? order.bids[0] : null);
+        if (!order.assignedSellerId && acceptedBid) {
+            order.assignedSellerId = acceptedBid.sellerId;
+            order.assignedSellerName = acceptedBid.sellerName;
+            acceptedBid.status = 'accepted';
+            order.selectedBidId = acceptedBid._id;
+        }
+
+        // Calculate amount from request, agreedPrice, accepted bid, or budget
+        let amount = req.body.amount ? parseFloat(req.body.amount) : order.agreedPrice;
         if (!amount || amount <= 0) {
             if (acceptedBid) {
                 amount = Math.round(acceptedBid.amount * (order.quantity || 1) * 100) / 100;
+            } else if (order.budget && order.budget > 0) {
+                amount = order.budget;
             } else {
-                amount = order.budget || 0;
+                amount = 1000; // Default nominal deposit
             }
-        }
-
-        if (!amount || amount <= 0) {
-            return res.status(400).json({ success: false, message: "Order amount is invalid or zero." });
         }
 
         // Process deposit into Admin Escrow via payment service

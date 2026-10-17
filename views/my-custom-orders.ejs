@@ -160,6 +160,179 @@
     .chat-send-btn:disabled { opacity: 0.5; cursor: not-allowed; }
     .chat-char-notice { margin-top: 6px; font-size: 0.72rem; color: #94a3b8; display: flex; justify-content: space-between; }
 
+    /* ===== ORDER CARD ACTIONS BAR & PAY BUTTONS ===== */
+    .order-card-actions-bar {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin: 14px 0 8px 0;
+        padding-top: 14px;
+        border-top: 1px solid #edf2f7;
+    }
+    .btn-pay-action {
+        background: linear-gradient(135deg, #f59e0b, #d97706);
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 8px;
+        font-weight: 800;
+        font-size: 0.9rem;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        box-shadow: 0 4px 14px rgba(217, 119, 6, 0.32);
+        transition: all 0.2s;
+    }
+    .btn-pay-action:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(217, 119, 6, 0.42);
+    }
+    .btn-confirm-action {
+        background: linear-gradient(135deg, #10b981, #059669);
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 8px;
+        font-weight: 800;
+        font-size: 0.9rem;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        box-shadow: 0 4px 14px rgba(5, 150, 105, 0.32);
+        transition: all 0.2s;
+    }
+    .btn-confirm-action:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(5, 150, 105, 0.42);
+    }
+    .btn-view-action {
+        background: #f1f5f9;
+        color: #334155;
+        border: 1px solid #cbd5e1;
+        padding: 9px 18px;
+        border-radius: 8px;
+        font-weight: 700;
+        font-size: 0.88rem;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        transition: all 0.2s;
+    }
+    .btn-view-action:hover {
+        background: #e2e8f0;
+        color: #0f172a;
+    }
+    .escrow-paid-badge-box {
+        background: #ecfdf5;
+        border: 1px solid #a7f3d0;
+        padding: 7px 14px;
+        border-radius: 8px;
+        font-size: 0.84rem;
+        color: #065f46;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .badge-status-pill {
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 0.78rem;
+        font-weight: 800;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+    }
+    .badge-received { background: #dcfce7; color: #15803d; }
+    .badge-completed { background: #e0e7ff; color: #3730a3; }
+    .badge-in-progress { background: #e0f2fe; color: #0369a1; }
+
+    /* Payment Modal */
+    .payment-modal {
+        position: fixed;
+        top: 0; left: 0; width: 100%; height: 100%;
+        z-index: 100000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 16px;
+    }
+    .payment-modal-overlay {
+        position: absolute;
+        top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(15, 23, 42, 0.7);
+        backdrop-filter: blur(4px);
+    }
+    .payment-modal-box {
+        position: relative;
+        width: 100%;
+        max-width: 480px;
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 25px 60px rgba(0,0,0,0.3);
+        overflow: hidden;
+        animation: chatPop 0.25s ease-out;
+    }
+    .payment-modal-header {
+        background: #0f172a;
+        color: white;
+        padding: 18px 24px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .payment-modal-header h4 { margin: 0; font-size: 1.1rem; font-weight: 800; display: flex; align-items: center; gap: 8px; }
+    .payment-modal-body {
+        padding: 24px;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+    .payment-method-selector {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+    }
+    .method-option {
+        border: 2px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 12px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        cursor: pointer;
+        transition: all 0.2s;
+        font-weight: 700;
+        font-size: 0.9rem;
+    }
+    .method-option:hover { border-color: #cbd5e1; }
+    .method-option.selected {
+        border-color: #f59e0b;
+        background: #fffbeb;
+        color: #b45309;
+    }
+    .method-option input { display: none; }
+    .payment-btn-submit {
+        background: linear-gradient(135deg, #10b981, #059669);
+        color: white;
+        border: none;
+        padding: 14px;
+        border-radius: 10px;
+        font-weight: 800;
+        font-size: 1rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        box-shadow: 0 4px 14px rgba(5, 150, 105, 0.3);
+        transition: all 0.25s;
+    }
+    .payment-btn-submit:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(5, 150, 105, 0.4); }
+
     /* ===== RESPONSIVE ===== */
     @media (max-width: 768px) {
         .my-orders-page { padding: 12px; }
@@ -256,9 +429,9 @@
                             <strong style="color:#92400e; display:block; font-size:0.9rem;"><i class="fas fa-shield-alt"></i> Payment Required for Production</strong>
                             <span style="font-size:0.82rem; color:#78350f;">Deposit BDT <%= (order.agreedPrice || order.budget || 0).toFixed(2) %> to PackBang Admin Escrow to start manufacturing safely.</span>
                         </div>
-                        <a href="/custom-order/<%= order.id %>" style="background:linear-gradient(135deg, #f59e0b, #d97706); color:white; padding:8px 16px; border-radius:8px; text-decoration:none; font-weight:800; font-size:0.85rem; display:inline-flex; align-items:center; gap:6px;">
+                        <button type="button" onclick="openPaymentModal('<%= order.id %>', <%= (order.agreedPrice || order.budget || 0) %>, '<%= (order.title || ('Order #' + order.id)).replace(/'/g, "\\'") %>')" style="background:linear-gradient(135deg, #f59e0b, #d97706); color:white; padding:8px 16px; border:none; border-radius:8px; cursor:pointer; font-weight:800; font-size:0.85rem; display:inline-flex; align-items:center; gap:6px;">
                             <i class="fas fa-lock"></i> Pay to Escrow
-                        </a>
+                        </button>
                     </div>
                 <% } else if (order.status === 'seller_completed') { %>
                     <div style="background:#faf5ff; border:1.5px solid #e9d5ff; border-radius:10px; padding:12px 18px; margin:10px 0; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
@@ -266,9 +439,9 @@
                             <strong style="color:#6b21a8; display:block; font-size:0.9rem;"><i class="fas fa-box-check"></i> Goods Delivered by Supplier</strong>
                             <span style="font-size:0.82rem; color:#581c87;">Please inspect the products and confirm receipt so Admin can release the supplier payout.</span>
                         </div>
-                        <a href="/custom-order/<%= order.id %>" style="background:linear-gradient(135deg, #10b981, #059669); color:white; padding:8px 16px; border-radius:8px; text-decoration:none; font-weight:800; font-size:0.85rem; display:inline-flex; align-items:center; gap:6px;">
+                        <button type="button" onclick="confirmOrderReceived('<%= order.id %>')" style="background:linear-gradient(135deg, #10b981, #059669); color:white; padding:8px 16px; border:none; border-radius:8px; cursor:pointer; font-weight:800; font-size:0.85rem; display:inline-flex; align-items:center; gap:6px;">
                             <i class="fas fa-check-double"></i> Confirm Receipt
-                        </a>
+                        </button>
                     </div>
                 <% } %>
 
@@ -393,6 +566,53 @@
                         <% if (order.adminNotes) { %><br><span style="color:#4a5568;"><strong>Reason:</strong> <%= order.adminNotes %></span><% } %>
                     </div>
                 <% } %>
+
+                <!-- ===== ORDER CARD ACTIONS & DIRECT PAYMENT ===== -->
+                <div class="order-card-actions-bar">
+                    <div class="order-action-left">
+                        <% if (order.paymentStatus === 'paid_to_admin') { %>
+                            <span class="escrow-paid-badge-box">
+                                <i class="fas fa-shield-alt"></i>
+                                <span><strong>Escrow Secured:</strong> BDT <%= (order.escrowAmount || order.agreedPrice || 0).toFixed(2) %> (<%= (order.paymentMethod || 'bKash').toUpperCase() %>)</span>
+                            </span>
+                        <% } else { %>
+                            <span style="font-size: 0.85rem; color: #64748b; display: inline-flex; align-items: center; gap: 6px;">
+                                <i class="fas fa-shield-alt" style="color: #f59e0b;"></i>
+                                PackBang 100% Escrow Protection
+                            </span>
+                        <% } %>
+                    </div>
+
+                    <div class="order-action-right">
+                        <a href="/custom-order/<%= order.id %>" class="btn-view-action">
+                            <i class="fas fa-eye"></i> View Order
+                        </a>
+
+                        <% if (order.paymentStatus === 'unpaid') { %>
+                            <% 
+                                const payableAmount = order.agreedPrice || order.budget || 0;
+                            %>
+                            <button type="button" 
+                                    class="btn-pay-action" 
+                                    onclick="openPaymentModal('<%= order.id %>', <%= payableAmount %>, '<%= (order.title || ('Order #' + order.id)).replace(/'/g, "\\'") %>')">
+                                <i class="fas fa-lock"></i> Pay Now (BDT <%= payableAmount.toFixed(2) %>)
+                            </button>
+                        <% } else if (order.paymentStatus === 'paid_to_admin' && order.status === 'seller_completed') { %>
+                            <button type="button" 
+                                    class="btn-confirm-action" 
+                                    onclick="confirmOrderReceived('<%= order.id %>')">
+                                <i class="fas fa-check-double"></i> Confirm Received
+                            </button>
+                        <% } else if (order.paymentStatus === 'paid_to_admin') { %>
+                            <button type="button" 
+                                    class="btn-pay-action" 
+                                    style="background: #e2e8f0; color: #475569; cursor: default; box-shadow: none;" 
+                                    title="Payment is already safely held in Admin Escrow">
+                                <i class="fas fa-check-circle" style="color: #059669;"></i> Paid to Admin
+                            </button>
+                        <% } %>
+                    </div>
+                </div>
             </div>
         <% }) %>
     <% } else { %>
@@ -680,6 +900,162 @@
             alert('Network error. Please try again.');
         }
     }
+
+    // ===== ESCROW PAYMENT & CONFIRMATION FUNCTIONS =====
+    let currentPaymentOrderId = null;
+    let selectedPaymentMethod = 'bkash';
+
+    function openPaymentModal(orderId, amount, title) {
+        currentPaymentOrderId = orderId;
+        const parsedAmount = parseFloat(amount) || 0;
+        document.getElementById('modalOrderTitle').textContent = title || ('Order #' + orderId);
+        document.getElementById('modalOrderAmount').textContent = 'BDT ' + parsedAmount.toFixed(2);
+        document.getElementById('modalAmountInput').value = parsedAmount;
+        selectPaymentMethod('bkash');
+        document.getElementById('escrowPaymentModal').style.display = 'flex';
+    }
+
+    function closePaymentModal() {
+        document.getElementById('escrowPaymentModal').style.display = 'none';
+        currentPaymentOrderId = null;
+    }
+
+    function selectPaymentMethod(method) {
+        selectedPaymentMethod = method;
+        document.querySelectorAll('.method-option').forEach(el => el.classList.remove('selected'));
+        const activeOption = document.querySelector(`.method-option[data-method="${method}"]`);
+        if (activeOption) activeOption.classList.add('selected');
+        
+        const label = document.getElementById('accountNumberLabel');
+        if (method === 'card') {
+            label.textContent = 'Card Number (Mock Gateway)';
+        } else if (method === 'bank_transfer') {
+            label.textContent = 'Bank Account / Reference';
+        } else {
+            label.textContent = `${method.toUpperCase()} Mobile Number (Mock Gateway)`;
+        }
+    }
+
+    async function submitEscrowPayment(e) {
+        e.preventDefault();
+        if (!currentPaymentOrderId) return;
+
+        const btn = document.getElementById('submitPaymentBtn');
+        const originalText = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing Secure Deposit...';
+
+        const accountNumber = document.getElementById('paymentAccountInput').value;
+        const amount = document.getElementById('modalAmountInput').value;
+
+        try {
+            const res = await fetch(`/api/custom-order/${encodeURIComponent(currentPaymentOrderId)}/pay`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    paymentMethod: selectedPaymentMethod,
+                    accountNumber: accountNumber,
+                    amount: amount
+                })
+            });
+
+            const data = await res.json();
+            if (data.success) {
+                alert(`✅ Payment Successful!\n\n${data.message}\nTransaction ID: ${data.transactionId}`);
+                closePaymentModal();
+                window.location.reload();
+            } else {
+                alert(`❌ ${data.message || 'Payment failed'}`);
+            }
+        } catch (err) {
+            alert('❌ Network error while processing payment. Please try again.');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = originalText;
+        }
+    }
+
+    async function confirmOrderReceived(orderId) {
+        if (!confirm('Are you sure you have received and inspected the packaging order? Clicking OK confirms that the goods are satisfactory and authorizes PackBang Admin to release the supplier payout.')) {
+            return;
+        }
+
+        try {
+            const res = await fetch(`/api/custom-order/${encodeURIComponent(orderId)}/confirm-received`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            });
+
+            const data = await res.json();
+            if (data.success) {
+                alert('✅ Order receipt confirmed! PackBang Admin has been notified to release payout to the supplier.');
+                window.location.reload();
+            } else {
+                alert(`❌ ${data.message || 'Confirmation failed'}`);
+            }
+        } catch (err) {
+            alert('❌ Network error. Please try again.');
+        }
+    }
 </script>
+
+<!-- ===== PACKBANG ESCROW PAYMENT MODAL ===== -->
+<div id="escrowPaymentModal" class="payment-modal" style="display: none;">
+    <div class="payment-modal-overlay" onclick="closePaymentModal()"></div>
+    <div class="payment-modal-box">
+        <div class="payment-modal-header">
+            <h4><i class="fas fa-shield-alt" style="color: #f59e0b;"></i> PackBang Secure Escrow</h4>
+            <button type="button" class="chat-close-btn" onclick="closePaymentModal()">&times;</button>
+        </div>
+        <form id="escrowPaymentForm" onsubmit="submitEscrowPayment(event)" class="payment-modal-body">
+            <input type="hidden" id="modalAmountInput" value="">
+            <div>
+                <strong id="modalOrderTitle" style="font-size: 1.05rem; color: #0f172a; display: block;">Custom Packaging Order</strong>
+                <span style="font-size: 0.85rem; color: #64748b;">Payment will be held in Admin Escrow until you confirm receipt.</span>
+            </div>
+
+            <div style="background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 12px; padding: 14px 18px; display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-size: 0.9rem; color: #475569; font-weight: 700;">Deposit Amount:</span>
+                <span id="modalOrderAmount" style="font-size: 1.35rem; font-weight: 900; color: #059669;">BDT 0.00</span>
+            </div>
+
+            <div>
+                <label style="display: block; font-size: 0.75rem; font-weight: 800; color: #475569; text-transform: uppercase; margin-bottom: 8px;">Select Payment Gateway</label>
+                <div class="payment-method-selector">
+                    <div class="method-option selected" data-method="bkash" onclick="selectPaymentMethod('bkash')">
+                        <i class="fas fa-mobile-alt" style="color:#d12053; font-size:1.2rem;"></i>
+                        <span>bKash</span>
+                    </div>
+                    <div class="method-option" data-method="nagad" onclick="selectPaymentMethod('nagad')">
+                        <i class="fas fa-wallet" style="color:#f97316; font-size:1.2rem;"></i>
+                        <span>Nagad</span>
+                    </div>
+                    <div class="method-option" data-method="rocket" onclick="selectPaymentMethod('rocket')">
+                        <i class="fas fa-paper-plane" style="color:#8b5cf6; font-size:1.2rem;"></i>
+                        <span>Rocket</span>
+                    </div>
+                    <div class="method-option" data-method="card" onclick="selectPaymentMethod('card')">
+                        <i class="fas fa-credit-card" style="color:#2563eb; font-size:1.2rem;"></i>
+                        <span>Card (Visa/MC)</span>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <label id="accountNumberLabel" style="display: block; font-size: 0.75rem; font-weight: 800; color: #475569; text-transform: uppercase; margin-bottom: 6px;">BKASH Mobile Number (Mock Gateway)</label>
+                <input type="text" id="paymentAccountInput" placeholder="01XXXXXXXXX" style="width: 100%; padding: 10px 14px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.95rem; font-family: inherit;" required value="01700000000">
+            </div>
+
+            <div style="font-size: 0.78rem; color: #64748b; background: #fefce8; border: 1px solid #fef08a; padding: 10px 14px; border-radius: 8px; display: flex; gap: 8px; align-items: flex-start;">
+                <i class="fas fa-lock" style="color: #ca8a04; margin-top: 2px;"></i>
+                <span><strong>Protected Transaction:</strong> Funds remain securely in PackBang Admin Escrow. Payout is released to the supplier only after you receive and confirm the products.</span>
+            </div>
+
+            <button type="submit" id="submitPaymentBtn" class="payment-btn-submit">
+                <i class="fas fa-check-circle"></i> Confirm & Deposit to Admin Escrow
+            </button>
+        </form>
+    </div>
+</div>
 
 <%- include('partials/footer') %>
