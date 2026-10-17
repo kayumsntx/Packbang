@@ -1739,12 +1739,92 @@ app.get("/my-custom-orders", requireAuth, async (req, res) => {
     }
 });
 
-// ---------- ADMIN CUSTOM ORDER MANAGEMENT ----------
-app.get("/admin/my-custom-orders", requireAdmin, (req, res) => {
-    res.render("admin-custom-orders", {
-        user: req.session.user,
-        isGuest: false
-    });
+// ---------- ADMIN SETTINGS FOR COMMISSION ----------
+app.get("/admin/commission", requireAdmin, async (req, res) => {
+    // For simplicity store commission in a single document
+    let config = await Commission.findOne();
+    if (!config) config = await new Commission({ percent: 10 }).save();
+    res.render("admin-commission", { user: req.session.user, commission: config.percent });
+});
+
+app.post("/admin/commission", requireAdmin, async (req, res) => {
+    const { percent } = req.body;
+    let config = await Commission.findOne();
+    if (!config) config = new Commission({ percent: percent });
+    else config.percent = percent;
+    await config.save();
+    res.json({ success: true, percent: config.percent });
+});
+
+// ---------- PAYMENT MOCK UTILS ----------
+async function processPayment({ amount, payerId, payeeId }) {
+    // In real life integrate with Stripe/PayPal. Here we just simulate success.
+    console.log(`💰 Mock payment of ${amount} from ${payerId} to ${payeeId}`);
+    return { success: true, transactionId: `TX-${Date.now()}` };
+}
+
+// ---------- CUSTOMER PAY ADMIN FOR CUSTOM ORDER ----------
+app.post("/api/custom-order/:orderId/pay", requireAuth, async (req, res) => {
+    const { orderId } = req.params;
+    try {
+        const order = await CustomOrder.findOne({ id: orderId });
+        if (!order) return res.status(404).json({ success: false, message: "Order not found" });
+        if (order.paymentStatus !== 'pending') return res.status(400).json({ success: false, message: "Order already paid" });
+        // Get admin commission %
+        const commissionConfig = await Commission.findOne();
+        const commissionPct = commissionConfig ? commissionConfig.percent : 10;
+        // Compute total amount (order.totalAmount already includes everything)
+        const amount = order.totalAmount;
+        const paymentResult = await processPayment({ amount, payerId: req.session.user.id, payeeId: 'admin' });
+        if (!paymentResult.success) throw new Error('Payment gateway failed');
+        order.paymentStatus = 'paid';
+        order.adminCommission = commissionPct;
+        await order.save();
+        res.json({ success: true, message: "Payment received", transactionId: paymentResult.transactionId });
+    } catch (err) {
+        console.error('Custom order payment error:', err);
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
+
+// ---------- SELLER MARK ORDER COMPLETE ----------
+app.post("/api/custom-order/:orderId/complete", requireSellerOrAdmin, async (req, res) => {
+    const { orderId } = req.params;
+    try {
+        const order = await CustomOrder.findOne({ id: orderId });
+        if (!order) return res.status(404).json({ success: false, message: "Order not found" });
+        if (order.paymentStatus !== 'paid') return res.status(400).json({ success: false, message: "Order not paid yet" });
+        // Seller marks as completed, admin will later payout
+        order.status = 'completed';
+        order.completedAt = new Date();
+        await order.save();
+        res.json({ success: true, message: "Order marked completed by seller" });
+    } catch (err) {
+        console.error('Seller complete error:', err);
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
+
+// ---------- ADMIN PAY SELLER AFTER CONFIRMATION ----------
+app.post("/api/admin/payout/:orderId", requireAdmin, async (req, res) => {
+    const { orderId } = req.params;
+    try {
+        const order = await CustomOrder.findOne({ id: orderId });
+        if (!order) return res.status(404).json({ success: false, message: "Order not found" });
+        if (order.paymentStatus !== 'paid' || order.status !== 'completed') return res.status(400).json({ success: false, message: "Order not ready for payout" });
+        if (order.payoutStatus === 'paid') return res.status(400).json({ success: false, message: "Seller already paid" });
+        // Compute payout amount after commission
+        const commissionAmt = (order.adminCommission / 100) * order.totalAmount;
+        const sellerAmt = order.totalAmount - commissionAmt;
+        const payoutResult = await processPayment({ amount: sellerAmt, payerId: 'admin', payeeId: order.sellerId });
+        if (!payoutResult.success) throw new Error('Payout failed');
+        order.payoutStatus = 'paid';
+        await order.save();
+        res.json({ success: true, message: "Seller paid", payoutTransactionId: payoutResult.transactionId, commissionTaken: commissionAmt });
+    } catch (err) {
+        console.error('Admin payout error:', err);
+        res.status(500).json({ success: false, message: err.message });
+    }
 });
 
 // Alias: navbar links to /admin/custom-orders
@@ -1823,6 +1903,11 @@ app.get("/product/:productId", async (req, res) => {
         res.status(500).send("Internal server error");
     }
 });
+// ---------- COMMISSION MODEL ----------
+const Commission = mongoose.model('Commission', new mongoose.Schema({
+    percent: { type: Number, default: 10 } // admin commission percentage
+}));
+
 // ---------- CATEGORY APIs ----------
 app.get('/api/categories', async (req, res) => {
     const categories = await Category.find().sort({ order: 1 });
