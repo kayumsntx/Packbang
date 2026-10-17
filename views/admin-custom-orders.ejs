@@ -13,17 +13,90 @@
         display: flex;
         align-items: center;
         gap: 12px;
+        color: #1e293b;
     }
+
+    /* ===== COMMISSION SETTINGS BAR ===== */
+    .commission-settings-card {
+        background: white;
+        border: 1.5px solid #fed7aa;
+        border-radius: 14px;
+        padding: 18px 24px;
+        margin-bottom: 26px;
+        box-shadow: 0 4px 15px rgba(243, 156, 18, 0.08);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 16px;
+    }
+    .commission-info h4 {
+        margin: 0 0 4px 0;
+        font-size: 1.05rem;
+        font-weight: 800;
+        color: #9a3412;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .commission-info p {
+        margin: 0;
+        font-size: 0.85rem;
+        color: #7c2d12;
+    }
+    .commission-form {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .commission-input-wrapper {
+        display: flex;
+        align-items: center;
+        background: #f8fafc;
+        border: 2px solid #cbd5e1;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+    .commission-input-wrapper input {
+        width: 70px;
+        padding: 8px 12px;
+        border: none;
+        background: transparent;
+        font-weight: 800;
+        font-size: 1.1rem;
+        text-align: center;
+        outline: none;
+    }
+    .commission-input-wrapper span {
+        padding-right: 12px;
+        font-weight: 800;
+        color: #64748b;
+    }
+    .btn-save-commission {
+        background: #ea580c;
+        color: white;
+        border: none;
+        padding: 10px 18px;
+        border-radius: 8px;
+        font-weight: 700;
+        font-size: 0.88rem;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    .btn-save-commission:hover { background: #c2410c; }
+
+    /* ===== ORDER CARD ===== */
     .order-card {
         background: white;
         border-radius: 12px;
         border: 1px solid #e2e8f0;
-        padding: 20px;
-        margin-bottom: 16px;
+        padding: 22px;
+        margin-bottom: 20px;
         transition: all 0.3s ease;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.03);
     }
     .order-card:hover {
-        box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+        box-shadow: 0 6px 25px rgba(0,0,0,0.08);
     }
     .order-card .header {
         display: flex;
@@ -34,40 +107,72 @@
         margin-bottom: 10px;
     }
     .order-card .title {
-        font-size: 1.1rem;
-        font-weight: 600;
-        color: #2d3748;
+        font-size: 1.15rem;
+        font-weight: 700;
+        color: #1e293b;
     }
     .order-card .status {
         padding: 4px 12px;
         border-radius: 20px;
         font-size: 0.75rem;
-        font-weight: 600;
+        font-weight: 700;
         text-transform: uppercase;
+        letter-spacing: 0.3px;
     }
     .status-pending { background: #fefcbf; color: #975a16; }
     .status-approved { background: #c6f6d5; color: #276749; }
     .status-rejected { background: #fed7d7; color: #9b2c2c; }
     .status-assigned { background: #bee3f8; color: #2a69ac; }
+    .status-in_progress { background: #e0f2fe; color: #0369a1; }
+    .status-seller_completed { background: #f3e8ff; color: #6b21a8; }
+    .status-received { background: #dcfce7; color: #15803d; }
     .status-completed { background: #e9d8fd; color: #6b46c1; }
+
     .order-card .meta {
-        font-size: 0.85rem;
-        color: #718096;
+        font-size: 0.86rem;
+        color: #64748b;
         margin: 6px 0;
     }
+
+    /* Escrow Summary Box */
+    .escrow-summary-box {
+        background: #f8fafc;
+        border: 1.5px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 12px 16px;
+        margin: 12px 0;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px 24px;
+        font-size: 0.86rem;
+    }
+    .escrow-summary-box .summary-item {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .escrow-summary-box strong { color: #0f172a; }
+    .badge-paid-escrow { background: #dcfce7; color: #166534; padding: 2px 8px; border-radius: 6px; font-weight: 700; font-size: 0.75rem; }
+    .badge-unpaid-escrow { background: #fef3c7; color: #92400e; padding: 2px 8px; border-radius: 6px; font-weight: 700; font-size: 0.75rem; }
+
     .order-card .actions {
         display: flex;
         gap: 10px;
         flex-wrap: wrap;
-        margin-top: 12px;
+        margin-top: 14px;
+        align-items: center;
     }
     .order-card .actions button {
-        padding: 6px 16px;
+        padding: 8px 16px;
         border: none;
-        border-radius: 6px;
-        font-weight: 600;
+        border-radius: 8px;
+        font-weight: 700;
         cursor: pointer;
-        transition: all 0.3s ease;
+        transition: all 0.25s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.84rem;
     }
     .btn-approve { background: #27ae60; color: white; }
     .btn-approve:hover { background: #219653; }
@@ -75,11 +180,36 @@
     .btn-reject:hover { background: #c0392b; }
     .btn-view { background: #4a5568; color: white; }
     .btn-view:hover { background: #2d3748; }
-    .bid-list {
-        background: #f7fafc;
+
+    .btn-release-payout {
+        background: linear-gradient(135deg, #10b981, #059669);
+        color: white;
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    }
+    .btn-release-payout:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 6px 18px rgba(16, 185, 129, 0.4);
+    }
+
+    .payout-released-badge {
+        background: #f0fdf4;
+        color: #166534;
+        border: 1px solid #bbf7d0;
+        padding: 6px 14px;
         border-radius: 8px;
-        padding: 12px;
-        margin-top: 12px;
+        font-size: 0.82rem;
+        font-weight: 800;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .bid-list {
+        background: #f8fafc;
+        border-radius: 10px;
+        padding: 14px;
+        margin-top: 14px;
+        border: 1px solid #e2e8f0;
     }
     .bid-item {
         display: flex;
@@ -91,11 +221,11 @@
     .bid-item:last-child { border-bottom: none; }
     .bid-item .bid-info { font-size: 0.9rem; }
     .bid-item .bid-actions button {
-        padding: 2px 12px;
+        padding: 4px 12px;
         border: none;
-        border-radius: 4px;
+        border-radius: 6px;
         font-size: 0.75rem;
-        font-weight: 600;
+        font-weight: 700;
         cursor: pointer;
     }
     .bid-accept { background: #27ae60; color: white; }
@@ -106,17 +236,204 @@
         color: #a0aec0;
     }
     .empty-state i { font-size: 3rem; display: block; margin-bottom: 12px; }
+
+    /* Payout Modal */
+    .payout-modal {
+        position: fixed;
+        top: 0; left: 0; width: 100%; height: 100%;
+        z-index: 100000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 16px;
+    }
+    .payout-modal-overlay {
+        position: absolute;
+        top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(15, 23, 42, 0.7);
+        backdrop-filter: blur(4px);
+    }
+    .payout-modal-box {
+        position: relative;
+        width: 100%;
+        max-width: 500px;
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 25px 60px rgba(0,0,0,0.3);
+        overflow: hidden;
+    }
+    .payout-modal-header {
+        background: #0f172a;
+        color: white;
+        padding: 18px 24px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .payout-modal-header h4 { margin: 0; font-size: 1.1rem; font-weight: 800; display: flex; align-items: center; gap: 8px; }
+    .payout-modal-body {
+        padding: 24px;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+    .payout-calc-box {
+        background: #f8fafc;
+        border: 1.5px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        font-size: 0.9rem;
+    }
+    .calc-row {
+        display: flex;
+        justify-content: space-between;
+        color: #475569;
+    }
+    .calc-row.total-payout {
+        border-top: 2px dashed #cbd5e1;
+        padding-top: 8px;
+        font-weight: 900;
+        font-size: 1.05rem;
+        color: #059669;
+    }
 </style>
 
 <div class="admin-orders-container">
-    <h2><i class="fas fa-clipboard-list"></i> Custom Orders Management</h2>
+    <h2><i class="fas fa-clipboard-list"></i> Custom Orders & Escrow Management</h2>
     
+    <!-- ===== ADMIN COMMISSION SETTINGS BAR ===== -->
+    <div class="commission-settings-card">
+        <div class="commission-info">
+            <h4><i class="fas fa-percentage"></i> Platform Commission Rate</h4>
+            <p>Admin commission is automatically deducted from custom order escrow when releasing payout to suppliers.</p>
+        </div>
+        <form class="commission-form" onsubmit="saveCommission(event)">
+            <div class="commission-input-wrapper">
+                <input type="number" id="commissionPercentInput" min="0" max="100" step="0.5" value="10" required>
+                <span>%</span>
+            </div>
+            <button type="submit" id="saveCommissionBtn" class="btn-save-commission">
+                <i class="fas fa-save"></i> Save Rate
+            </button>
+        </form>
+    </div>
+
+    <!-- ===== ORDERS LIST ===== -->
     <div id="ordersList">
         <div class="empty-state"><i class="fas fa-spinner fa-spin"></i><p>Loading...</p></div>
     </div>
 </div>
 
+<!-- ===== RELEASE PAYOUT MODAL ===== -->
+<div id="payoutModal" class="payout-modal" style="display: none;">
+    <div class="payout-modal-overlay" onclick="closePayoutModal()"></div>
+    <div class="payout-modal-box">
+        <div class="payout-modal-header">
+            <h4><i class="fas fa-hand-holding-usd" style="color: #10b981;"></i> Release Seller Payout</h4>
+            <button type="button" class="btn-view" style="padding: 2px 8px;" onclick="closePayoutModal()">&times;</button>
+        </div>
+        <form id="payoutForm" onsubmit="submitPayout(event)" class="payout-modal-body">
+            <input type="hidden" id="payoutOrderId" value="">
+            
+            <div>
+                <strong id="payoutSellerTitle" style="font-size: 1rem; color: #0f172a; display: block;">Seller: Packaging Supplier</strong>
+                <span id="payoutOrderRef" style="font-size: 0.82rem; color: #64748b;">Order #...</span>
+            </div>
+
+            <div class="payout-calc-box">
+                <div class="calc-row">
+                    <span>Customer Paid into Escrow:</span>
+                    <strong id="calcGrossAmount">BDT 0.00</strong>
+                </div>
+                <div class="calc-row">
+                    <span id="calcCommissionLabel">Admin Commission (10%):</span>
+                    <strong id="calcCommissionAmount" style="color: #ea580c;">- BDT 0.00</strong>
+                </div>
+                <div class="calc-row total-payout">
+                    <span>Net Payout to Supplier:</span>
+                    <span id="calcNetAmount">BDT 0.00</span>
+                </div>
+            </div>
+
+            <div>
+                <label style="display: block; font-size: 0.75rem; font-weight: 800; color: #475569; text-transform: uppercase; margin-bottom: 6px;">Disbursement Gateway</label>
+                <select id="payoutMethodSelect" style="width: 100%; padding: 10px 14px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.9rem; font-family: inherit;">
+                    <option value="bkash">bKash B2C Disbursement</option>
+                    <option value="nagad">Nagad Payout</option>
+                    <option value="bank_transfer">BEFTN / Bank Transfer</option>
+                </select>
+            </div>
+
+            <div>
+                <label style="display: block; font-size: 0.75rem; font-weight: 800; color: #475569; text-transform: uppercase; margin-bottom: 6px;">Supplier Payout Account / Phone</label>
+                <input type="text" id="payoutAccountInput" value="01900000000" style="width: 100%; padding: 10px 14px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.9rem;" required>
+            </div>
+
+            <div style="font-size: 0.78rem; color: #64748b; background: #f0fdf4; border: 1px solid #bbf7d0; padding: 10px 14px; border-radius: 8px; display: flex; gap: 8px; align-items: flex-start;">
+                <i class="fas fa-shield-alt" style="color: #166534; margin-top: 2px;"></i>
+                <span>Admin will retain the platform commission and disburse net funds to the verified supplier. This marks the order completed.</span>
+            </div>
+
+            <button type="submit" id="submitPayoutBtn" class="btn-release-payout" style="padding: 12px; justify-content: center; font-size: 0.95rem; border: none; border-radius: 8px; cursor: pointer;">
+                <i class="fas fa-check-circle"></i> Confirm Payout & Complete Order
+            </button>
+        </form>
+    </div>
+</div>
+
 <script>
+    let currentAdminCommission = 10;
+
+    async function loadCommissionSettings() {
+        try {
+            const res = await fetch('/api/admin/commission');
+            const data = await res.json();
+            if (data.success && data.percent !== undefined) {
+                currentAdminCommission = data.percent;
+                document.getElementById('commissionPercentInput').value = data.percent;
+            }
+        } catch (err) {
+            console.error('Failed to load commission rate', err);
+        }
+    }
+
+    async function saveCommission(e) {
+        e.preventDefault();
+        const percent = parseFloat(document.getElementById('commissionPercentInput').value);
+        if (isNaN(percent) || percent < 0 || percent > 100) {
+            alert('Please enter a valid percentage between 0 and 100.');
+            return;
+        }
+
+        const btn = document.getElementById('saveCommissionBtn');
+        const orig = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+
+        try {
+            const res = await fetch('/api/admin/commission', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ percent })
+            });
+            const data = await res.json();
+            if (data.success) {
+                alert(`✅ ${data.message || 'Commission updated successfully!'}`);
+                currentAdminCommission = data.percent;
+            } else {
+                alert(`❌ ${data.message}`);
+            }
+        } catch (err) {
+            alert('❌ Failed to update commission');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = orig;
+        }
+    }
+
     async function loadOrders() {
         try {
             const res = await fetch('/api/custom-orders');
@@ -142,6 +459,11 @@
         let html = '';
         orders.forEach(order => {
             const statusClass = 'status-' + order.status;
+            const agreedAmount = order.agreedPrice || order.budget || 0;
+            const commissionPct = order.adminCommissionPercent || currentAdminCommission || 10;
+            const commissionAmt = Math.round((agreedAmount * commissionPct) / 100 * 100) / 100;
+            const netSellerPayout = Math.round((agreedAmount - commissionAmt) * 100) / 100;
+
             const bidsHtml = order.bids && order.bids.length > 0 ? `
                 <div class="bid-list">
                     <strong>Bids (${order.bids.length})</strong>
@@ -167,28 +489,70 @@
             html += `
                 <div class="order-card">
                     <div class="header">
-                        <span class="title">${order.title}</span>
+                        <div>
+                            <span class="title">${order.title}</span>
+                            <span style="font-size:0.8rem; color:#94a3b8; margin-left:8px;">#${order.id}</span>
+                        </div>
                         <span class="status ${statusClass}">${order.status}</span>
                     </div>
                     <div class="meta">
                         <i class="fas fa-user"></i> ${order.customerName} 
                         | <i class="fas fa-envelope"></i> ${order.customerEmail}
                         | <i class="fas fa-calendar"></i> ${new Date(order.createdAt).toLocaleDateString()}
-                        ${order.budget ? `| <i class="fas fa-money-bill"></i> BDT ${order.budget}` : ''}
+                        ${order.budget ? `| <i class="fas fa-money-bill"></i> Target Budget: BDT ${order.budget}` : ''}
                     </div>
                     <div class="meta"><strong>Description:</strong> ${order.description.substring(0, 150)}${order.description.length > 150 ? '...' : ''}</div>
                     
-                    ${order.status === 'pending' ? `
-                        <div class="actions">
-                            <button class="btn-approve" onclick="updateOrderStatus('${order.id}', 'approved')">Approve</button>
-                            <button class="btn-reject" onclick="updateOrderStatus('${order.id}', 'rejected')">Reject</button>
-                            <button class="btn-view" onclick="window.open('/custom-order/${order.id}', '_blank')">View Details</button>
+                    <!-- Escrow & Financial Summary Box -->
+                    <div class="escrow-summary-box">
+                        <div class="summary-item">
+                            <span>Escrow Status:</span>
+                            ${order.paymentStatus === 'paid_to_admin' 
+                                ? `<span class="badge-paid-escrow"><i class="fas fa-check-circle"></i> Paid BDT ${agreedAmount.toFixed(2)}</span>` 
+                                : `<span class="badge-unpaid-escrow"><i class="fas fa-clock"></i> Unpaid</span>`}
                         </div>
-                    ` : `
-                        <div class="actions">
-                            <button class="btn-view" onclick="window.open('/custom-order/${order.id}', '_blank')">View Details</button>
+                        <div class="summary-item">
+                            <span>Assigned Supplier:</span>
+                            <strong>${order.assignedSellerName || 'None'}</strong>
                         </div>
-                    `}
+                        <div class="summary-item">
+                            <span>Customer Delivery Confirmation:</span>
+                            ${order.customerConfirmedReceived 
+                                ? `<strong style="color:#059669;"><i class="fas fa-check-double"></i> Confirmed Received</strong>` 
+                                : `<span style="color:#64748b;">Pending Customer Receipt</span>`}
+                        </div>
+                        ${order.paymentStatus === 'paid_to_admin' ? `
+                            <div class="summary-item">
+                                <span>Platform Commission (${commissionPct}%):</span>
+                                <strong style="color:#ea580c;">BDT ${commissionAmt.toFixed(2)}</strong>
+                            </div>
+                            <div class="summary-item">
+                                <span>Net Seller Payout:</span>
+                                <strong style="color:#059669;">BDT ${netSellerPayout.toFixed(2)}</strong>
+                            </div>
+                        ` : ''}
+                    </div>
+
+                    <div class="actions">
+                        ${order.status === 'pending' ? `
+                            <button class="btn-approve" onclick="updateOrderStatus('${order.id}', 'approved')"><i class="fas fa-check"></i> Approve for Bidding</button>
+                            <button class="btn-reject" onclick="updateOrderStatus('${order.id}', 'rejected')"><i class="fas fa-times"></i> Reject</button>
+                        ` : ''}
+
+                        <button class="btn-view" onclick="window.open('/custom-order/${order.id}', '_blank')"><i class="fas fa-eye"></i> View Details</button>
+
+                        ${order.paymentStatus === 'paid_to_admin' && order.payoutStatus !== 'paid' ? `
+                            <button class="btn-release-payout" onclick="openPayoutModal('${order.id}', ${agreedAmount}, ${commissionPct}, '${(order.assignedSellerName || 'Seller').replace(/'/g, "\\'")}')">
+                                <i class="fas fa-hand-holding-usd"></i> Release Payout to Seller
+                            </button>
+                        ` : ''}
+
+                        ${order.payoutStatus === 'paid' ? `
+                            <span class="payout-released-badge">
+                                <i class="fas fa-check-circle"></i> Payout Released (BDT ${(order.sellerPayoutAmount || 0).toFixed(2)})
+                            </span>
+                        ` : ''}
+                    </div>
                     
                     ${order.status === 'approved' ? bidsHtml : ''}
                 </div>
@@ -237,7 +601,71 @@
         }
     }
 
-    document.addEventListener('DOMContentLoaded', loadOrders);
+    // ===== ADMIN PAYOUT MODAL FUNCTIONS =====
+    function openPayoutModal(orderId, agreedAmount, commissionPct, sellerName) {
+        const commAmt = Math.round((agreedAmount * commissionPct) / 100 * 100) / 100;
+        const netAmt = Math.round((agreedAmount - commAmt) * 100) / 100;
+
+        document.getElementById('payoutOrderId').value = orderId;
+        document.getElementById('payoutSellerTitle').textContent = `Seller: ${sellerName}`;
+        document.getElementById('payoutOrderRef').textContent = `Order #${orderId}`;
+        document.getElementById('calcGrossAmount').textContent = `BDT ${agreedAmount.toFixed(2)}`;
+        document.getElementById('calcCommissionLabel').textContent = `Admin Commission (${commissionPct}%):`;
+        document.getElementById('calcCommissionAmount').textContent = `- BDT ${commAmt.toFixed(2)}`;
+        document.getElementById('calcNetAmount').textContent = `BDT ${netAmt.toFixed(2)}`;
+
+        document.getElementById('payoutModal').style.display = 'flex';
+    }
+
+    function closePayoutModal() {
+        document.getElementById('payoutModal').style.display = 'none';
+        document.getElementById('payoutOrderId').value = '';
+    }
+
+    async function submitPayout(e) {
+        e.preventDefault();
+        const orderId = document.getElementById('payoutOrderId').value;
+        const payoutMethod = document.getElementById('payoutMethodSelect').value;
+        const payoutAccountNumber = document.getElementById('payoutAccountInput').value;
+
+        if (!orderId) return;
+
+        const btn = document.getElementById('submitPayoutBtn');
+        const orig = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Disbursing Payout...';
+
+        try {
+            const res = await fetch(`/api/admin/custom-order/${encodeURIComponent(orderId)}/release-payout`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    payoutMethod,
+                    payoutAccountNumber,
+                    overrideConfirm: true // Admin authorized
+                })
+            });
+
+            const data = await res.json();
+            if (data.success) {
+                alert(`✅ ${data.message || 'Payout released successfully!'}`);
+                closePayoutModal();
+                loadOrders();
+            } else {
+                alert(`❌ ${data.message}`);
+            }
+        } catch (err) {
+            alert('❌ Failed to release payout');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = orig;
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        loadCommissionSettings();
+        loadOrders();
+    });
 </script>
 
 <%- include('partials/footer') %>

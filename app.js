@@ -21,8 +21,10 @@ const mongoose = require("mongoose");
 const steadfast = require("./steadfast");
 
 const Category = require("./models/Category");
-
 const Banner = require("./models/Banner");
+const Commission = require("./models/Commission");
+const PaymentTransaction = require("./models/PaymentTransaction");
+const paymentService = require("./services/paymentService");
 
 
 const app = express();
@@ -1208,10 +1210,35 @@ const customOrderSchema = new mongoose.Schema({
     deadline: { type: Date, default: null },
     status: { 
         type: String, 
-        enum: ['pending', 'approved', 'rejected', 'assigned', 'completed'],
+        enum: ['pending', 'approved', 'rejected', 'assigned', 'in_progress', 'seller_completed', 'received', 'completed', 'cancelled'],
         default: 'pending' 
     },
     adminNotes: { type: String, default: '' },
+    assignedSellerId: { type: String, default: null },
+    assignedSellerName: { type: String, default: null },
+    agreedPrice: { type: Number, default: 0 },
+    paymentStatus: { 
+        type: String, 
+        enum: ['unpaid', 'pending', 'paid_to_admin', 'refunded'], 
+        default: 'unpaid' 
+    },
+    escrowAmount: { type: Number, default: 0 },
+    paymentMethod: { type: String, default: '' },
+    paymentTransactionId: { type: String, default: '' },
+    paidAt: { type: Date, default: null },
+    sellerCompletedAt: { type: Date, default: null },
+    customerConfirmedReceived: { type: Boolean, default: false },
+    customerConfirmedAt: { type: Date, default: null },
+    adminCommissionPercent: { type: Number, default: 10 },
+    adminCommissionAmount: { type: Number, default: 0 },
+    sellerPayoutAmount: { type: Number, default: 0 },
+    payoutStatus: { 
+        type: String, 
+        enum: ['pending', 'eligible', 'paid', 'withheld'], 
+        default: 'pending' 
+    },
+    payoutTransactionId: { type: String, default: '' },
+    payoutAt: { type: Date, default: null },
     bids: [{
         sellerId: { type: String, required: true },
         sellerName: { type: String, required: true },
@@ -1220,7 +1247,7 @@ const customOrderSchema = new mongoose.Schema({
         note: { type: String, default: '' },
         status: { 
             type: String, 
-            enum: ['pending', 'accepted', 'rejected'],
+            enum: ['pending', 'accepted', 'rejected'], 
             default: 'pending' 
         },
         createdAt: { type: Date, default: Date.now }
@@ -1534,17 +1561,25 @@ app.put(["/api/custom-order/:orderId/bid/:bidId", "/api/admin/custom-order/:orde
             order.bids.forEach((b, idx) => {
                 if (idx !== bidIndex) b.status = 'rejected';
             });
-            order.bids[bidIndex].status = 'accepted';
+            const selectedBid = order.bids[bidIndex];
+            selectedBid.status = 'accepted';
             order.status = 'assigned';
-            order.selectedBidId = order.bids[bidIndex]._id;
+            order.selectedBidId = selectedBid._id;
+            order.assignedSellerId = selectedBid.sellerId;
+            order.assignedSellerName = selectedBid.sellerName;
+            const unitPrice = selectedBid.amount;
+            const qty = order.quantity || 1;
+            order.agreedPrice = Math.round(unitPrice * qty * 100) / 100;
+            order.paymentStatus = 'unpaid';
+            order.payoutStatus = 'pending';
 
             if (!order.messages) order.messages = [];
             order.messages.push({
                 senderId: 'SYSTEM',
-                senderName: 'PackBang Safe System',
+                senderName: 'PackBang Escrow System',
                 senderRole: 'admin',
-                sellerId: order.bids[bidIndex].sellerId,
-                text: "Quotation accepted for BDT. " + order.bids[bidIndex].amount + " by customer. Supplier assigned for production.",
+                sellerId: selectedBid.sellerId,
+                text: `Supplier ${selectedBid.sellerName} assigned for quotation of BDT ${unitPrice}/pc (Total: BDT ${order.agreedPrice}). Customer must deposit payment to Admin Escrow before production begins.`,
                 createdAt: new Date()
             });
         } else if (action === 'reject') {
@@ -1739,90 +1774,359 @@ app.get("/my-custom-orders", requireAuth, async (req, res) => {
     }
 });
 
-// ---------- ADMIN SETTINGS FOR COMMISSION ----------
-app.get("/admin/commission", requireAdmin, async (req, res) => {
-    // For simplicity store commission in a single document
-    let config = await Commission.findOne();
-    if (!config) config = await new Commission({ percent: 10 }).save();
-    res.render("admin-commission", { user: req.session.user, commission: config.percent });
-});
-
-app.post("/admin/commission", requireAdmin, async (req, res) => {
-    const { percent } = req.body;
-    let config = await Commission.findOne();
-    if (!config) config = new Commission({ percent: percent });
-    else config.percent = percent;
-    await config.save();
-    res.json({ success: true, percent: config.percent });
-});
-
-// ---------- PAYMENT MOCK UTILS ----------
-async function processPayment({ amount, payerId, payeeId }) {
-    // In real life integrate with Stripe/PayPal. Here we just simulate success.
-    console.log(`💰 Mock payment of ${amount} from ${payerId} to ${payeeId}`);
-    return { success: true, transactionId: `TX-${Date.now()}` };
+// ==========================================
+// ADMIN COMMISSION SETTINGS & APIS
+// ==========================================
+async function getAdminCommissionPercent() {
+    try {
+        let config = await Commission.findOne();
+        if (!config) {
+            config = new Commission({ percent: 10 });
+            await config.save();
+        }
+        return config.percent;
+    } catch (e) {
+        return 10;
+    }
 }
 
-// ---------- CUSTOMER PAY ADMIN FOR CUSTOM ORDER ----------
+app.get("/api/admin/commission", requireAdmin, async (req, res) => {
+    try {
+        const percent = await getAdminCommissionPercent();
+        res.json({ success: true, percent });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
+
+app.post("/api/admin/commission", requireAdmin, async (req, res) => {
+    try {
+        const percent = parseFloat(req.body.percent);
+        if (isNaN(percent) || percent < 0 || percent > 100) {
+            return res.status(400).json({ success: false, message: "Commission percent must be a number between 0 and 100." });
+        }
+        let config = await Commission.findOne();
+        if (!config) config = new Commission({ percent });
+        else config.percent = percent;
+        await config.save();
+        res.json({ success: true, message: `Admin commission updated to ${percent}%`, percent: config.percent });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
+
+// ==========================================
+// CUSTOM ORDER ESCROW & PAYMENT WORKFLOW
+// 1. Customer Pays Admin Escrow
+// ==========================================
 app.post("/api/custom-order/:orderId/pay", requireAuth, async (req, res) => {
     const { orderId } = req.params;
+    const { paymentMethod = 'bkash', accountNumber = '' } = req.body;
+    const user = req.session.user;
+
     try {
         const order = await CustomOrder.findOne({ id: orderId });
         if (!order) return res.status(404).json({ success: false, message: "Order not found" });
-        if (order.paymentStatus !== 'pending') return res.status(400).json({ success: false, message: "Order already paid" });
-        // Get admin commission %
-        const commissionConfig = await Commission.findOne();
-        const commissionPct = commissionConfig ? commissionConfig.percent : 10;
-        // Compute total amount (order.totalAmount already includes everything)
-        const amount = order.totalAmount;
-        const paymentResult = await processPayment({ amount, payerId: req.session.user.id, payeeId: 'admin' });
-        if (!paymentResult.success) throw new Error('Payment gateway failed');
-        order.paymentStatus = 'paid';
-        order.adminCommission = commissionPct;
+
+        // Only the customer who created the order or admin can pay
+        const isOwner = order.customerId === user.id;
+        const isAdmin = user.role === 'admin' || user.role === 'superadmin' || user.isSuperAdmin;
+        if (!isOwner && !isAdmin) {
+            return res.status(403).json({ success: false, message: "Only the customer can make payment for this order." });
+        }
+
+        // Must be in assigned state and unpaid
+        if (!order.assignedSellerId) {
+            return res.status(400).json({ success: false, message: "Please accept a supplier's quote to assign a seller before payment." });
+        }
+
+        if (order.paymentStatus === 'paid_to_admin') {
+            return res.status(400).json({ success: false, message: "Payment has already been deposited to Admin Escrow for this order." });
+        }
+
+        // Calculate total amount
+        const acceptedBid = order.bids.find(b => b.status === 'accepted' || b._id.toString() === order.selectedBidId);
+        let amount = order.agreedPrice;
+        if (!amount || amount <= 0) {
+            if (acceptedBid) {
+                amount = Math.round(acceptedBid.amount * (order.quantity || 1) * 100) / 100;
+            } else {
+                amount = order.budget || 0;
+            }
+        }
+
+        if (!amount || amount <= 0) {
+            return res.status(400).json({ success: false, message: "Order amount is invalid or zero." });
+        }
+
+        // Process deposit into Admin Escrow via payment service
+        const paymentResult = await paymentService.processCustomerEscrow({
+            orderId: order.id,
+            orderTitle: order.title,
+            customerId: order.customerId,
+            customerName: order.customerName,
+            customerPhone: order.customerPhone,
+            amount: amount,
+            paymentMethod: paymentMethod,
+            accountNumber: accountNumber
+        });
+
+        const currentCommission = await getAdminCommissionPercent();
+
+        order.agreedPrice = amount;
+        order.escrowAmount = amount;
+        order.paymentStatus = 'paid_to_admin';
+        order.paymentMethod = paymentMethod;
+        order.paymentTransactionId = paymentResult.transactionId;
+        order.paidAt = new Date();
+        order.status = 'in_progress';
+        order.adminCommissionPercent = currentCommission;
+        order.payoutStatus = 'pending';
+
+        if (!order.messages) order.messages = [];
+        order.messages.push({
+            senderId: 'SYSTEM',
+            senderName: 'PackBang Escrow System',
+            senderRole: 'admin',
+            sellerId: order.assignedSellerId,
+            text: `Payment of BDT. ${amount.toFixed(2)} received & securely held in Admin Escrow via ${paymentMethod.toUpperCase()} (TX: ${paymentResult.transactionId}). Assigned supplier ${order.assignedSellerName || ''} is now authorized to begin production.`,
+            createdAt: new Date()
+        });
+
+        order.updatedAt = new Date();
         await order.save();
-        res.json({ success: true, message: "Payment received", transactionId: paymentResult.transactionId });
+
+        broadcastRefresh({ action: 'custom_order_paid', orderId: order.id });
+
+        res.json({
+            success: true,
+            message: paymentResult.message,
+            transactionId: paymentResult.transactionId,
+            order
+        });
     } catch (err) {
-        console.error('Custom order payment error:', err);
+        console.error("Custom order payment error:", err);
         res.status(500).json({ success: false, message: err.message });
     }
 });
 
-// ---------- SELLER MARK ORDER COMPLETE ----------
-app.post("/api/custom-order/:orderId/complete", requireSellerOrAdmin, async (req, res) => {
+// ==========================================
+// 2. Seller Marks Order Completed & Dispatched
+// ==========================================
+app.post(["/api/custom-order/:orderId/seller-complete", "/api/custom-order/:orderId/complete"], requireSellerOrAdmin, async (req, res) => {
     const { orderId } = req.params;
+    const user = req.session.user;
+
     try {
         const order = await CustomOrder.findOne({ id: orderId });
         if (!order) return res.status(404).json({ success: false, message: "Order not found" });
-        if (order.paymentStatus !== 'paid') return res.status(400).json({ success: false, message: "Order not paid yet" });
-        // Seller marks as completed, admin will later payout
-        order.status = 'completed';
-        order.completedAt = new Date();
+
+        // Must be the assigned seller or admin
+        const isAssignedSeller = order.assignedSellerId === user.id;
+        const isAdmin = user.role === 'admin' || user.role === 'superadmin' || user.isSuperAdmin;
+        if (!isAssignedSeller && !isAdmin) {
+            return res.status(403).json({ success: false, message: "Only the assigned seller can mark this custom order as completed." });
+        }
+
+        // Must be paid to admin first
+        if (order.paymentStatus !== 'paid_to_admin') {
+            return res.status(400).json({ success: false, message: "Order cannot be marked completed because customer has not deposited payment to Admin Escrow yet." });
+        }
+
+        order.status = 'seller_completed';
+        order.sellerCompletedAt = new Date();
+
+        if (!order.messages) order.messages = [];
+        order.messages.push({
+            senderId: user.id,
+            senderName: user.profile?.name || user.username,
+            senderRole: 'seller',
+            sellerId: order.assignedSellerId,
+            text: `Production complete! The custom order has been packaged and delivered/shipped. Customer, please inspect packages and confirm receipt.`,
+            createdAt: new Date()
+        });
+
+        order.updatedAt = new Date();
         await order.save();
-        res.json({ success: true, message: "Order marked completed by seller" });
+
+        broadcastRefresh({ action: 'custom_order_seller_completed', orderId: order.id });
+
+        res.json({
+            success: true,
+            message: "Order successfully marked as completed by seller. Customer has been asked to confirm receipt.",
+            order
+        });
     } catch (err) {
-        console.error('Seller complete error:', err);
+        console.error("Seller complete error:", err);
         res.status(500).json({ success: false, message: err.message });
     }
 });
 
-// ---------- ADMIN PAY SELLER AFTER CONFIRMATION ----------
-app.post("/api/admin/payout/:orderId", requireAdmin, async (req, res) => {
+// ==========================================
+// 3. Customer Confirms Order Received
+// ==========================================
+app.post("/api/custom-order/:orderId/confirm-received", requireAuth, async (req, res) => {
     const { orderId } = req.params;
+    const user = req.session.user;
+
     try {
         const order = await CustomOrder.findOne({ id: orderId });
         if (!order) return res.status(404).json({ success: false, message: "Order not found" });
-        if (order.paymentStatus !== 'paid' || order.status !== 'completed') return res.status(400).json({ success: false, message: "Order not ready for payout" });
-        if (order.payoutStatus === 'paid') return res.status(400).json({ success: false, message: "Seller already paid" });
-        // Compute payout amount after commission
-        const commissionAmt = (order.adminCommission / 100) * order.totalAmount;
-        const sellerAmt = order.totalAmount - commissionAmt;
-        const payoutResult = await processPayment({ amount: sellerAmt, payerId: 'admin', payeeId: order.sellerId });
-        if (!payoutResult.success) throw new Error('Payout failed');
+
+        // Only the customer or admin can confirm receipt
+        const isOwner = order.customerId === user.id;
+        const isAdmin = user.role === 'admin' || user.role === 'superadmin' || user.isSuperAdmin;
+        if (!isOwner && !isAdmin) {
+            return res.status(403).json({ success: false, message: "Only the customer who placed this order can confirm receipt." });
+        }
+
+        if (order.status !== 'seller_completed' && order.status !== 'in_progress' && order.status !== 'assigned') {
+            return res.status(400).json({ success: false, message: "Order is not in a state ready for delivery confirmation." });
+        }
+
+        order.customerConfirmedReceived = true;
+        order.customerConfirmedAt = new Date();
+        order.status = 'received';
+        order.payoutStatus = 'eligible'; // Eligible for admin payout
+
+        if (!order.messages) order.messages = [];
+        order.messages.push({
+            senderId: user.id,
+            senderName: user.profile?.name || user.username,
+            senderRole: 'customer',
+            sellerId: order.assignedSellerId,
+            text: `Customer has successfully received and verified the custom order. Order marked as received. Escrow payout is now queued for Admin release.`,
+            createdAt: new Date()
+        });
+
+        order.updatedAt = new Date();
+        await order.save();
+
+        broadcastRefresh({ action: 'custom_order_received', orderId: order.id });
+
+        res.json({
+            success: true,
+            message: "Thank you! Receipt confirmed. Admin has been notified to release payout to the supplier.",
+            order
+        });
+    } catch (err) {
+        console.error("Customer confirm error:", err);
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
+
+// ==========================================
+// 4. Admin Takes Commission & Releases Payout to Seller
+// ==========================================
+app.post(["/api/admin/custom-order/:orderId/release-payout", "/api/admin/payout/:orderId"], requireAdmin, async (req, res) => {
+    const { orderId } = req.params;
+    const { payoutMethod = 'bkash', payoutAccountNumber = '', overrideConfirm = false } = req.body;
+
+    try {
+        const order = await CustomOrder.findOne({ id: orderId });
+        if (!order) return res.status(404).json({ success: false, message: "Order not found" });
+
+        if (order.paymentStatus !== 'paid_to_admin') {
+            return res.status(400).json({ success: false, message: "Cannot release payout: Customer has not paid money to Admin Escrow." });
+        }
+
+        if (order.payoutStatus === 'paid') {
+            return res.status(400).json({ success: false, message: "Payout for this order has already been released to the seller." });
+        }
+
+        if (!order.customerConfirmedReceived && !overrideConfirm) {
+            return res.status(400).json({ success: false, message: "Customer has not yet confirmed receipt of this order. (Check 'Override Confirmation' if resolving a dispute)." });
+        }
+
+        const commissionPct = order.adminCommissionPercent || (await getAdminCommissionPercent());
+        const grossAmount = order.agreedPrice || order.escrowAmount || order.budget || 0;
+
+        if (grossAmount <= 0) {
+            return res.status(400).json({ success: false, message: "Invalid order amount for payout." });
+        }
+
+        // Process seller payout via payment service
+        const payoutResult = await paymentService.processSellerPayout({
+            orderId: order.id,
+            orderTitle: order.title,
+            sellerId: order.assignedSellerId || 'UNKNOWN_SELLER',
+            sellerName: order.assignedSellerName || 'Assigned Packaging Supplier',
+            grossAmount: grossAmount,
+            commissionPercent: commissionPct,
+            payoutMethod: payoutMethod,
+            payoutAccountNumber: payoutAccountNumber,
+            adminId: req.session.user.id
+        });
+
+        order.adminCommissionPercent = payoutResult.commissionPercent;
+        order.adminCommissionAmount = payoutResult.commissionAmount;
+        order.sellerPayoutAmount = payoutResult.sellerPayoutAmount;
         order.payoutStatus = 'paid';
+        order.payoutTransactionId = payoutResult.transactionId;
+        order.payoutAt = new Date();
+        order.status = 'completed';
+
+        if (!order.messages) order.messages = [];
+        order.messages.push({
+            senderId: 'SYSTEM',
+            senderName: 'PackBang Escrow System',
+            senderRole: 'admin',
+            sellerId: order.assignedSellerId,
+            text: `Admin released payout of BDT. ${payoutResult.sellerPayoutAmount.toFixed(2)} to supplier ${order.assignedSellerName} via ${payoutMethod.toUpperCase()} (TX: ${payoutResult.transactionId}) after retaining ${payoutResult.commissionPercent}% platform commission (BDT. ${payoutResult.commissionAmount.toFixed(2)}). Order successfully completed!`,
+            createdAt: new Date()
+        });
+
+        order.updatedAt = new Date();
         await order.save();
-        res.json({ success: true, message: "Seller paid", payoutTransactionId: payoutResult.transactionId, commissionTaken: commissionAmt });
+
+        broadcastRefresh({ action: 'custom_order_completed', orderId: order.id });
+
+        res.json({
+            success: true,
+            message: payoutResult.message,
+            payoutResult,
+            order
+        });
     } catch (err) {
-        console.error('Admin payout error:', err);
+        console.error("Admin payout error:", err);
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
+
+// ==========================================
+// 5. Get Payment & Escrow Breakdown for an Order
+// ==========================================
+app.get("/api/custom-order/:orderId/payment-details", requireAuth, async (req, res) => {
+    try {
+        const order = await CustomOrder.findOne({ id: req.params.orderId });
+        if (!order) return res.status(404).json({ success: false, message: "Order not found" });
+
+        const commissionPct = order.adminCommissionPercent || (await getAdminCommissionPercent());
+        const total = order.agreedPrice || order.budget || 0;
+        const commissionAmount = Math.round((total * commissionPct) / 100 * 100) / 100;
+        const sellerPayout = Math.round((total - commissionAmount) * 100) / 100;
+
+        const transactions = await paymentService.getOrderTransactions(order.id);
+
+        res.json({
+            success: true,
+            orderId: order.id,
+            totalAmount: total,
+            paymentStatus: order.paymentStatus,
+            paymentMethod: order.paymentMethod,
+            paymentTransactionId: order.paymentTransactionId,
+            paidAt: order.paidAt,
+            customerConfirmedReceived: order.customerConfirmedReceived,
+            customerConfirmedAt: order.customerConfirmedAt,
+            commissionPercent: commissionPct,
+            commissionAmount: order.adminCommissionAmount || commissionAmount,
+            sellerPayoutAmount: order.sellerPayoutAmount || sellerPayout,
+            payoutStatus: order.payoutStatus,
+            payoutTransactionId: order.payoutTransactionId,
+            payoutAt: order.payoutAt,
+            transactions
+        });
+    } catch (err) {
         res.status(500).json({ success: false, message: err.message });
     }
 });
@@ -1903,11 +2207,6 @@ app.get("/product/:productId", async (req, res) => {
         res.status(500).send("Internal server error");
     }
 });
-// ---------- COMMISSION MODEL ----------
-const Commission = mongoose.model('Commission', new mongoose.Schema({
-    percent: { type: Number, default: 10 } // admin commission percentage
-}));
-
 // ---------- CATEGORY APIs ----------
 app.get('/api/categories', async (req, res) => {
     const categories = await Category.find().sort({ order: 1 });

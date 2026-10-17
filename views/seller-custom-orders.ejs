@@ -187,9 +187,76 @@
                 imagesHtml = '<div class="no-image"><i class="fas fa-image"></i> No reference images</div>';
             }
             
-            // Bid section
+            // Bid and Order lifecycle section
             let bidHtml = '';
-            if (userBid) {
+            const isAssignedToMe = (order.assignedSellerId === currentSellerId) || (userBid && userBid.status === 'accepted');
+
+            if (isAssignedToMe) {
+                if (order.paymentStatus !== 'paid_to_admin') {
+                    bidHtml = `
+                        <div style="background:#fffbeb; border:1.5px solid #fde68a; border-radius:10px; padding:16px; margin-top:14px; color:#92400e;">
+                            <div style="font-weight:800; font-size:1rem; display:flex; align-items:center; gap:8px;">
+                                <i class="fas fa-hourglass-half"></i> Assigned to You! Awaiting Customer Escrow Deposit
+                            </div>
+                            <p style="margin:6px 0 0 0; font-size:0.86rem;">
+                                Customer accepted your quote. Manufacturing is authorized as soon as the customer deposits BDT ${parseFloat(order.agreedPrice || (userBid ? userBid.amount : 0)).toFixed(2)} to PackBang Admin Escrow.
+                            </p>
+                        </div>
+                    `;
+                } else if (order.status === 'seller_completed') {
+                    bidHtml = `
+                        <div style="background:#f3e8ff; border:1.5px solid #e9d5ff; border-radius:10px; padding:16px; margin-top:14px; color:#6b21a8;">
+                            <div style="font-weight:800; font-size:1rem; display:flex; align-items:center; gap:8px;">
+                                <i class="fas fa-check-circle"></i> Production Completed & Delivered
+                            </div>
+                            <p style="margin:6px 0 0 0; font-size:0.86rem;">
+                                You marked this order complete. Waiting for customer to inspect packaging and confirm receipt. Once confirmed, Admin releases payout.
+                            </p>
+                        </div>
+                    `;
+                } else if (order.status === 'received') {
+                    bidHtml = `
+                        <div style="background:#ecfdf5; border:1.5px solid #a7f3d0; border-radius:10px; padding:16px; margin-top:14px; color:#065f46;">
+                            <div style="font-weight:800; font-size:1rem; display:flex; align-items:center; gap:8px;">
+                                <i class="fas fa-check-double"></i> Customer Confirmed Receipt!
+                            </div>
+                            <p style="margin:6px 0 0 0; font-size:0.86rem;">
+                                Customer confirmed successful delivery. Admin has been notified to release net payout of BDT ${(order.sellerPayoutAmount || (order.agreedPrice * 0.9)).toFixed(2)}.
+                            </p>
+                        </div>
+                    `;
+                } else if (order.status === 'completed' && order.payoutStatus === 'paid') {
+                    bidHtml = `
+                        <div style="background:#f0fdf4; border:1.5px solid #bbf7d0; border-radius:10px; padding:16px; margin-top:14px; color:#166534;">
+                            <div style="font-weight:800; font-size:1rem; display:flex; align-items:center; gap:8px;">
+                                <i class="fas fa-hand-holding-usd"></i> Payout Released!
+                            </div>
+                            <p style="margin:6px 0 0 0; font-size:0.86rem;">
+                                Admin released payout of BDT ${(order.sellerPayoutAmount || 0).toFixed(2)} via ${(order.paymentMethod || 'bKash').toUpperCase()} (TX: ${order.payoutTransactionId || 'COMPLETED'}).
+                            </p>
+                        </div>
+                    `;
+                } else {
+                    // In Progress / Paid to Admin - Seller can complete
+                    bidHtml = `
+                        <div style="background:#f0fdf4; border:1.5px solid #86efac; border-radius:10px; padding:18px; margin-top:14px;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+                                <div>
+                                    <div style="font-weight:800; color:#166534; font-size:1.05rem; display:flex; align-items:center; gap:8px;">
+                                        <i class="fas fa-shield-alt"></i> Payment Secured in Admin Escrow!
+                                    </div>
+                                    <div style="font-size:0.85rem; color:#15803d; margin-top:4px;">
+                                        Customer has deposited BDT ${(order.agreedPrice || 0).toFixed(2)} with Admin. You are authorized to manufacture and dispatch.
+                                    </div>
+                                </div>
+                                <button type="button" class="btn-bid" style="background:linear-gradient(135deg, #10b981, #059669); box-shadow:0 4px 14px rgba(16,185,129,0.3);" onclick="markOrderCompleted('${order.id}')">
+                                    <i class="fas fa-check-circle"></i> Mark Order Complete & Shipped
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                }
+            } else if (userBid) {
                 bidHtml = `
                     <div class="already-bid">
                         <i class="fas fa-check-circle"></i>
@@ -344,6 +411,28 @@
         }
         btn.disabled = false;
         btn.innerHTML = originalText;
+    }
+
+    async function markOrderCompleted(orderId) {
+        if (!confirm('Are you sure you have finished manufacturing and shipped/delivered this custom packaging order? Customer will be notified to inspect and confirm receipt.')) {
+            return;
+        }
+
+        try {
+            const res = await fetch(`/api/custom-order/${encodeURIComponent(orderId)}/seller-complete`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            });
+            const data = await res.json();
+            if (data.success) {
+                alert('✅ Order marked as completed and shipped! Customer has been asked to confirm receipt.');
+                loadOrders();
+            } else {
+                alert(`❌ ${data.message || 'Operation failed'}`);
+            }
+        } catch (err) {
+            alert('❌ Network error. Please try again.');
+        }
     }
 
     document.addEventListener('DOMContentLoaded', loadOrders);

@@ -210,9 +210,19 @@
                         </span>
 
                         <span class="status-badge status-<%= order.status %>">
-                            <i class="fas <%= order.status === 'pending' ? 'fa-clock' : (order.status === 'approved' ? 'fa-check-circle' : (order.status === 'rejected' ? 'fa-times-circle' : (order.status === 'assigned' ? 'fa-user-check' : 'fa-check-double'))) %>"></i>
-                            <%= order.status.charAt(0).toUpperCase() + order.status.slice(1) %>
+                            <i class="fas <%= order.status === 'pending' ? 'fa-clock' : (order.status === 'approved' ? 'fa-check-circle' : (order.status === 'rejected' ? 'fa-times-circle' : (order.status === 'assigned' ? 'fa-user-check' : (order.status === 'seller_completed' ? 'fa-truck' : (order.status === 'received' ? 'fa-box-check' : 'fa-check-double'))))) %>"></i>
+                            <%= order.status.replace(/_/g, ' ').toUpperCase() %>
                         </span>
+
+                        <% if (order.paymentStatus === 'paid_to_admin') { %>
+                            <span class="status-badge" style="background:#dcfce7; color:#15803d; border:1px solid #86efac;">
+                                <i class="fas fa-shield-alt"></i> Admin Escrow Paid
+                            </span>
+                        <% } else if (order.assignedSellerId || order.status === 'assigned') { %>
+                            <span class="status-badge" style="background:#fef3c7; color:#92400e; border:1px solid #fde047;">
+                                <i class="fas fa-exclamation-circle"></i> Escrow Deposit Needed
+                            </span>
+                        <% } %>
                     </div>
                 </div>
 
@@ -221,6 +231,12 @@
                     <span><i class="fas fa-calendar-alt"></i> <%= new Date(order.createdAt).toLocaleDateString('en-BD', { day: '2-digit', month: 'short', year: 'numeric' }) %></span>
                     <% if (order.budget && order.budget > 0) { %>
                         <span><i class="fas fa-money-bill-wave"></i> Budget: BDT. <%= order.budget.toFixed(2) %></span>
+                    <% } %>
+                    <% if (order.agreedPrice && order.agreedPrice > 0) { %>
+                        <span style="font-weight:800; color:#059669;"><i class="fas fa-handshake"></i> Agreed Price: BDT. <%= order.agreedPrice.toFixed(2) %></span>
+                    <% } %>
+                    <% if (order.assignedSellerName) { %>
+                        <span><i class="fas fa-industry"></i> Supplier: <%= order.assignedSellerName %></span>
                     <% } %>
                     <% if (order.quantity && order.quantity > 1) { %>
                         <span><i class="fas fa-cubes"></i> Qty: <%= order.quantity.toLocaleString() %> pcs</span>
@@ -232,6 +248,29 @@
 
                 <!-- Description -->
                 <div class="order-description"><%= order.description %></div>
+
+                <!-- Escrow Quick Action Prompts -->
+                <% if ((order.assignedSellerId || order.status === 'assigned') && order.paymentStatus === 'unpaid') { %>
+                    <div style="background:#fffbeb; border:1.5px solid #fde68a; border-radius:10px; padding:12px 18px; margin:10px 0; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+                        <div>
+                            <strong style="color:#92400e; display:block; font-size:0.9rem;"><i class="fas fa-shield-alt"></i> Payment Required for Production</strong>
+                            <span style="font-size:0.82rem; color:#78350f;">Deposit BDT <%= (order.agreedPrice || order.budget || 0).toFixed(2) %> to PackBang Admin Escrow to start manufacturing safely.</span>
+                        </div>
+                        <a href="/custom-order/<%= order.id %>" style="background:linear-gradient(135deg, #f59e0b, #d97706); color:white; padding:8px 16px; border-radius:8px; text-decoration:none; font-weight:800; font-size:0.85rem; display:inline-flex; align-items:center; gap:6px;">
+                            <i class="fas fa-lock"></i> Pay to Escrow
+                        </a>
+                    </div>
+                <% } else if (order.status === 'seller_completed') { %>
+                    <div style="background:#faf5ff; border:1.5px solid #e9d5ff; border-radius:10px; padding:12px 18px; margin:10px 0; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+                        <div>
+                            <strong style="color:#6b21a8; display:block; font-size:0.9rem;"><i class="fas fa-box-check"></i> Goods Delivered by Supplier</strong>
+                            <span style="font-size:0.82rem; color:#581c87;">Please inspect the products and confirm receipt so Admin can release the supplier payout.</span>
+                        </div>
+                        <a href="/custom-order/<%= order.id %>" style="background:linear-gradient(135deg, #10b981, #059669); color:white; padding:8px 16px; border-radius:8px; text-decoration:none; font-weight:800; font-size:0.85rem; display:inline-flex; align-items:center; gap:6px;">
+                            <i class="fas fa-check-double"></i> Confirm Receipt
+                        </a>
+                    </div>
+                <% } %>
 
                 <!-- Images -->
                 <% if (order.images && order.images.length > 0) { %>
